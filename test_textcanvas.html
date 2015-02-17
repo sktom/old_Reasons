@@ -14,10 +14,8 @@
       $("#background_canvas").width(screen.width).height(screen.height).css("opacity", "0.8");
       background_canvas.addEventListener('click', onclick, false);
 
-      var Status = function(){};
-      Status.sketch_canvas = 'inactive';
       function onclick(){
-        switch(Status.sketch_canvas){
+        switch(SketchCanvas.state){
           case 'active':
             SketchCanvas.clear(); break;
           case 'inactive':

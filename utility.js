@@ -42,7 +42,7 @@ function generateElement(type, style){
 
   var element = document.createElement(type);
   document.body.appendChild(element);
-  element.id = style.toString();
+  element.id = element.id || style.toString();
   $("#" + element.id).css(style);
   return element;
   //return style.apply(element);
