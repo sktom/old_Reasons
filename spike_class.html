@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html>
+  <body onclick="main()">
+    <canvas id="main_canvas" style="background-color:yellow"></canvas>
+    <script src = "./jquery-1.11.2.js"></script>
+    <script type = "text/javascript">
+      Object.prototype.arienai = function(arg){
+        alert("arg");
+        alert(arg);
+        var obj = this;
+        alert(this);
+        return $.map(Object.keys(this), function(k){
+            alert(k);
+            alert(k.toString() + "=" + obj[k].toString());
+          return(k.toString() + "_" + obj[k].toString());
+        }).join("-");
+      }
+      function main(){
+        Style = function(){}
+        style = new Style();
+        style.width = 1000;
+        style.height = 1000;
+        //alert(style.sot_());
+        alert('sthsthsthsh');
+        x = 200; y = 100, c="#c0ffee";
+        $("#main_canvas").css({'position':'absolute', top: y + 20, left:x + 20, 'background-color':c, width:260, height:300});
+        alert('end');
+      }
+    </script>
+  </body>
+</html>
+
