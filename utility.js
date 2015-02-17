@@ -22,11 +22,28 @@ Style = function(x, y, c, w, h){
   }
 }
 
+Style = function(pref){
+  obj = this;
+  $.each(pref, function(k, v){
+    obj[k] = v;
+  });
+}
+
+Style.prototype.toString = function(){
+  var obj = this;
+  return $.map(Object.keys(this), function(k){
+    if(obj[k]==null){return "";}
+    return(k.toString().replace(/#/g, '') + "_" + obj[k].toString().replace(/#/g, ''));
+  }).join("-");
+}
+
 function generateElement(type, style){
   if(SketchCanvas[type]){return SketchCanvas[type];}
 
   var element = document.createElement(type);
   document.body.appendChild(element);
-  element.id = style.to_s();
-  return style.apply(element);
+  element.id = style.toString();
+  $("#" + element.id).css(style);
+  return element;
+  //return style.apply(element);
 }
