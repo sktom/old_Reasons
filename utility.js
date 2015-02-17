@@ -37,13 +37,16 @@ Style.prototype.toString = function(){
   }).join("-");
 }
 
-function generateElement(type, style){
-  if(SketchCanvas[type]){return SketchCanvas[type];}
-
+function generateElement(type, style, id){
   var element = document.createElement(type);
   document.body.appendChild(element);
-  element.id = element.id || style.toString();
+  element.id = id || style.toString();
   $("#" + element.id).css(style);
   return element;
-  //return style.apply(element);
 }
+
+function random(n){
+  if(n == null){n = 1;}
+  return Math.random() * n;
+}
+
