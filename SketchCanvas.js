@@ -1,5 +1,6 @@
 
-require('jquery-1.11.2.js');
+require('./jquery-1.11.2.min.js');
+require('./jquery-ui.min.js ');
 
 var SketchCanvas = function(){};
 SketchCanvas.id = 'sketch_canvas';
@@ -14,7 +15,8 @@ SketchCanvas.init = function(x, y, c){
     "width" : 240, "height" : 30, 'background-color' : c});
   style['input'] = new Style({
     'position' : 'absolute', "top" : y - 90, "left" : x - 90,
-    "width" : 260, "height" : 240, 'background-color' : c});
+    "width" : 260, "height" : 240, 'background-color' : c,
+    "font-size" : "40px"});
   SketchCanvas.elements = $.map(['canvas', 'button', 'input'], function(type){
     element = generateElement(type, style[type], "sketch_canvas_" + type);
     SketchCanvas[type] = element;
@@ -22,6 +24,9 @@ SketchCanvas.init = function(x, y, c){
   }
 );
   SketchCanvas["button"].addEventListener('click', add_idea, true);
+  var keyDownCode = 0;
+  $("#sketch_canvas_input").keydown(function(e){keyDownCode = e.which;});
+  $("#sketch_canvas_input").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){add_idea();}});
 
   SketchCanvas.clear(0);
 }
@@ -31,6 +36,7 @@ SketchCanvas.display = function(duration){
   $.each(SketchCanvas.elements, function(key, value){
     $('#' + value.id).show(duration);
   })
+  $("#sketch_canvas_input").focus();
   SketchCanvas.state = 'active';
 }
 SketchCanvas.clear = function(duration){
@@ -42,16 +48,20 @@ SketchCanvas.clear = function(duration){
   SketchCanvas.state = 'inactive';
 }
 
+var idea_list = [];
 function add_idea(){
+  var idea = SketchCanvas['input'].value;
+  SketchCanvas.clear();
+  if($.inArray(idea, idea_list) == -1){idea_list.push(idea);}else{return;}
+
   var idea_canvas = generateElement('canvas', new Style({
     "position" : "absolute",
     "top" : random() * screen.height, "left" : random() * screen.width,
-    "width" : 150, "height" : 100,
-    "background-color" : "#c0ffee"}),
-    SketchCanvas['input'].value.replace(/#/g, ""));
+    "width" : 150, "height" : 100, "background-color" : "#c0ffee"}),
+    idea.escape());
+  $("#" + idea_canvas.id).draggable();
   ctx = idea_canvas.getContext("2d");
-  ctx.font = "40px Helvetica";
-  ctx.fillText(SketchCanvas.input.value, 0, 40);
-
-  SketchCanvas.clear();
+  ctx.font = "50px Helvetica";
+  ctx.fillText(idea, 0, 40);
 }
+
