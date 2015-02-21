@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+    <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
+
+    <style type = "text/css">*{margin : 0; padding : 0;}</style>
+  </head>
+  <body>
+    <canvas id = "background_canvas" style = "background-color:#eeeeee"></canvas>
+
+    <script type = "text/javascript">
+
+function p(arg){
+  alert(arg);
+}
+
+Style = function(pref){
+  obj = this;
+  $.each(pref, function(k, v){
+    obj[k] = v;
+  });
+}
+
+Style.prototype.toString = function(){
+  var obj = this;
+  return $.map(Object.keys(this), function(k){
+    if(obj[k]==null){return "";}
+    return(k.toString().escape() + "_" + obj[k].toString().replace(/#/g, ''));
+  }).join("-");
+}
+
+function generateElement(type, style, id){
+  var element = document.createElement(type);
+  document.body.appendChild(element);
+  element.id = id || style.toString();
+  $("#" + element.id).css(style);
+  return element;
+}
+
+function random(n){
+  if(n == null){n = 1;}
+  return Math.random() * n;
+}
+
+String.prototype.escape = function() {
+  return this.replace(/[\`\~\!\@\#\$\%\^\&\*\(\)\{\}\[\]\?\\\s\t]/g,'')
+}
+
+
+
+var socket = io();                                                        
+
+var SketchCanvas = function(){};
+SketchCanvas.id = 'sketch_canvas';
+
+SketchCanvas.init = function(x, y, c){
+  var style = function(){};
+  style['canvas'] = new Style({
+    'position' : 'absolute', "top" : y - 150, "left" : x - 150,
+    "width" : 280, "height" : 300, 'background-color' : c});
+  style['button'] = new Style({
+    'position' : 'absolute', "top" : y + 110, "left" : x - 130,
+    "width" : 240, "height" : 30, 'background-color' : c});
+  style['input'] = new Style({
+    'position' : 'absolute', "top" : y - 140, "left" : x - 140,
+    "width" : 260, "height" : 240, 'background-color' : c,
+    "font-size" : "40px"});
+  SketchCanvas.elements = $.map(['canvas', 'button', 'input'], function(type){
+    var element = generateElement(type, style[type], "sketch_canvas_" + type);
+    SketchCanvas[type] = element;
+    return element;
+  }
+);
+  SketchCanvas["button"].addEventListener('click', add_idea, true);
+  var keyDownCode = 0;
+  $("#sketch_canvas_input").keydown(function(e){keyDownCode = e.which;});
+  $("#sketch_canvas_input").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){add_idea();}});
+
+  SketchCanvas.clear(0);
+}
+
+SketchCanvas.display = function(duration){
+  if(duration == null){duration = 500;}
+  $.each(SketchCanvas.elements, function(key, value){
+    $('#' + value.id).show(duration);
+  })
+  $("#sketch_canvas_input").focus();
+  SketchCanvas.state = 'active';
+}
+SketchCanvas.clear = function(duration){
+  if(duration == null){duration = 500;}
+  $.each(SketchCanvas.elements, function(key, value){
+    $('#' + value.id).hide(duration);
+  })
+  SketchCanvas.input.value = "";
+  SketchCanvas.state = 'inactive';
+}
+
+var idea_list = [];
+function add_idea(){
+  var idea = SketchCanvas['input'].value;
+  SketchCanvas.clear();
+  if($.inArray(idea, idea_list) == -1){idea_list.push(idea);}else{return;}
+
+  var idea_canvas = generateElement('canvas', new Style({
+    "position" : "absolute",
+    "top" : random() * screen.height, "left" : random() * screen.width,
+    "width" : 150, "height" : 100, "background-color" : "#c0ffee"}),
+    idea.escape());
+  $("#" + idea_canvas.id).draggable();
+  ctx = idea_canvas.getContext("2d");
+  ctx.font = "50px Helvetica";
+  ctx.fillText(idea, 0, 40);
+
+  socket.emit('add_idea', idea);
+}
+
+
+
+
+      SketchCanvas.init($(window).width() / 2, $(window).height() / 2, '#c0ffee');
+      $("#background_canvas").width($(window).width()).height($(window).height()).css("opacity", "0.8");
+      background_canvas.addEventListener('click', onclick, false);
+
+      function onclick(){
+        switch(SketchCanvas.state){
+          case 'active':
+            SketchCanvas.clear(); break;
+          case 'inactive':
+            SketchCanvas.display(); break;
+        }
+      }
+
+    </script>
+  </body>
+</html>
+
