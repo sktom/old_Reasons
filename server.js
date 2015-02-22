@@ -13,23 +13,6 @@ db.once('open', function (callback) {
 });
 var Idea = mongoose.model("Idea", mongoose.Schema({idea:String}));
 
-/*
-var MongoClient = require('mongodb').MongoClient;
-var url = 'mongodb://localhost:27017/Reasons';
-var collection;
-MongoClient.connect(url, function (err, db) {
-  console.log(err);
-  console.log('Connected.');
-  //console.log(db.collections);
-  //db.createCollection("abcd");
-  console.log(db.idea_collection.find());
-  //collection = db.createCollection("people", { size: 2147483648 } );
-  //collection = db.idea_collection;//.insert({"idea" : "Teketo na Idea2"});
-  //console.log(collection);
-  //db.close();
-});
-*/
-
 app.get('/', function(req, res){
   res.sendfile('index.html');
 });
