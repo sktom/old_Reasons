@@ -32,11 +32,11 @@ Style.prototype.toString = function(){
   }).join("-");
 }
 
-function generateElement(type, style, id){
+function generateElement(type, option){
   var element = document.createElement(type);
   document.body.appendChild(element);
-  element.id = id || style.toString();
-  $("#" + element.id).css(style);
+  element.id = option.id || style.toString();
+  $("#" + element.id).css(option.style);
   return element;
 }
 
@@ -56,10 +56,11 @@ var socket = io();
 var SketchCanvas = function(){};
 SketchCanvas.id = 'sketch_canvas';
 
-emit_idea = function(){
-  socket.emit("add_idea", {"idea" : SketchCanvas["input"].value});
+submit_idea = function(){
+  socket.emit("submit_idea", {"idea" : SketchCanvas["input"].value, "issue" : SketchCanvas.issue});
 }
 SketchCanvas.init = function(x, y, c){
+  SketchCanvas.issue = null;
   var style = function(){};
   style['canvas'] = new Style({
     'position' : 'absolute', "top" : y - 150, "left" : x - 150,
@@ -72,16 +73,16 @@ SketchCanvas.init = function(x, y, c){
     "width" : 260, "height" : 240, 'background-color' : c,
     "font-size" : "40px"});
   SketchCanvas.elements = $.map(['canvas', 'button', 'input'], function(type){
-    var element = generateElement(type, style[type], "sketch_canvas_" + type);
+      var element = generateElement(type, {"style" : style[type], "id" : "sketch_canvas_" + type});
     SketchCanvas[type] = element;
     return element;
   }
 );
-  SketchCanvas["button"].addEventListener('click', emit_idea, true);
+  SketchCanvas["button"].addEventListener('click', submit_idea, true);
   var keyDownCode = 0;
   $("#sketch_canvas_input").keydown(function(e){keyDownCode = e.which;});
   $("#sketch_canvas_input").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
-      emit_idea();
+      submit_idea();
       //add_idea(SketchCanvas['input'].value);
       }});
 
@@ -113,16 +114,17 @@ function add_idea(idea, left, top){
   SketchCanvas.clear();
   if($.inArray(idea, idea_list) == -1){idea_list.push(idea);}else{return;}
 
-  var idea_canvas = generateElement('canvas', new Style({
+  var idea_canvas = generateElement('canvas', {"style" : new Style({
     "position" : "absolute",
     "top" : top, "left" : left,
     "width" : 150, "height" : 100, "background-color" : "#c0ffee"}),
-    idea.toString().escape());
+      "id" : idea.toString().escape()});
   $("#" + idea_canvas.id).draggable();
   ctx = idea_canvas.getContext("2d");
   ctx.font = "50px Helvetica";
   ctx.fillText(idea, 0, 40);
 }
+
 
 
 

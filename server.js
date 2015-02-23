@@ -11,24 +11,31 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
 });
-var Idea = mongoose.model("Idea", mongoose.Schema({idea:String}));
+var Schema = mongoose.Schema;
+var Idea = mongoose.model("Idea", Schema({
+  "idea":String, "type" : Number,
+  "parent":Schema.Types.ObjectId, "children":Array
+}));
 
 app.get('/', function(req, res){
   res.sendfile('index.html');
 });
 
 io.on('connection', function(socket){
+  io.emit("init_idea", {"idea" : "Root Idea", "type" : -1});
   Idea.find(function(err, ideas){
     ideas.forEach(function(idea){
       io.emit("init_idea", idea);
     });
   });
-  socket.on('add_idea', function(msg){
-  console.log('__Connected.');
-    io.emit('add_idea', msg);
-    console.log(msg.idea.toString());
-    idea = new Idea({"idea" : msg.idea});
+  socket.on('submit_idea', function(msg){
+    var idea = new Idea({
+      "idea" : msg.idea, "type" : msg.type, "parent" : msg.issue});
     idea.save();
+    io.emit('add_idea', idea);
+    var parent_idea = (msg.issue == null) ? Idea.find({"type" : -1}) : Idea.find({"_id" : msg.issue});
+    var brothers = Idea.find({"_id" : msg.issue}).children || [];
+    //Idea.update({"_id" : msg.issue}, {"children" : brothers.push(idea._id)});
   });
 });
 
