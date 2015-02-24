@@ -16,7 +16,6 @@ db.once('open', function (callback) {
 });
 var Schema = mongoose.Schema;
 var Idea = mongoose.model("Idea", Schema({
-//var Idea = db.model("Idea", Schema({
   "idea":String, "idea_type" : Number,
   "issue":Schema.Types.ObjectId, "children":Array
 }));
@@ -57,7 +56,6 @@ io.on('connection', function(socket){
   });
 
   function register_child(issue_id, child_id){
-    p("issue_id = " + issue_id);
     Idea.findOne({"_id" : issue_id}, function(err, issue_idea){
       issue_idea.children.push(child_id);
       issue_idea.save();
@@ -71,7 +69,6 @@ io.on('connection', function(socket){
 
   socket.on('get_idea', function(id){
     Idea.find({"_id" : id}, function(err, ideas){
-      //console.log(ideas[0].idea);
       socket.emit("add_idea", ideas[0]);
     });
   });

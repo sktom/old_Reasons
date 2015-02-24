@@ -49,8 +49,13 @@ String.prototype.escape = function() {
   return this.replace(/[\`\~\!\@\#\$\%\^\&\*\(\)\{\}\[\]\?\\\/\s\t]/g,'')
 }
 
+Array.prototype.last = function(){
+  return this[this.length - 1];
+}
+
 
 var issue;
+var issue_tree = [];
 
 var socket = io();                                                        
 
@@ -83,7 +88,6 @@ SketchCanvas.init = function(x, y, c){
   $("#sketch_canvas_input").keydown(function(e){keyDownCode = e.which;});
   $("#sketch_canvas_input").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
     submit_idea();
-    //add_idea(SketchCanvas['input'].value);
   }});
 
   SketchCanvas.clear(0);
@@ -124,11 +128,7 @@ function add_idea(idea){
   ctx.fillText(idea.idea, 0, 40);
 
   idea_canvas.addEventListener('click', function(){
-    idea_list.clear();
-    issue = idea._id;
-    $.map(idea.children, function(id){
-      socket.emit('get_idea', id);
-    });
+    transit(idea._id);
   }, true);
 
   idea_list.push(idea_canvas);
@@ -144,9 +144,20 @@ idea_list.clear = function(){
 
       SketchCanvas.init($(window).width() / 2, $(window).height() / 2, '#c0ffee');
       $("#background_canvas").width($(window).width()).height($(window).height()).css("opacity", "0.8");
-      background_canvas.addEventListener('click', onclick, false);
 
-      function onclick(){
+
+      $("#background_canvas").bind('contextmenu', function(e){
+        return false;
+      }); 
+      $("#background_canvas").mousedown(function(e){
+          switch(e.which){
+          case 1:
+            on_left_click(); break;
+          case 3:
+            on_right_click(); break;
+          }
+      });
+      function on_left_click(){
         switch(SketchCanvas.state){
           case 'active':
             SketchCanvas.clear();
@@ -155,10 +166,21 @@ idea_list.clear = function(){
             SketchCanvas.display(); break;
         }
       }
+      function on_right_click(){
+        transit(issue_tree[issue_tree.length - 2]);
+      }
 
-      socket.on('transit', function(new_issue){
+      function transit(new_issue){
         issue = new_issue;
+        issue_tree.push(issue);
+        while(issue_tree.indexOf(issue) + 1 < issue_tree.length){
+          issue_tree.pop();
+        }
+        idea_list.clear();
         socket.emit("init_bord", issue);
+      }
+      socket.on('transit', function(new_issue){
+        transit(new_issue);
       });
       socket.on('add_idea', function(idea){
         add_idea(idea);
