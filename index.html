@@ -50,6 +50,7 @@ String.prototype.escape = function() {
 }
 
 
+var issue;
 
 var socket = io();                                                        
 
@@ -57,10 +58,9 @@ var SketchCanvas = function(){};
 SketchCanvas.id = 'sketch_canvas';
 
 submit_idea = function(){
-  socket.emit("submit_idea", {"idea" : SketchCanvas["input"].value, "issue" : SketchCanvas.issue});
+  socket.emit("submit_idea", {"idea" : SketchCanvas["input"].value, "issue" : issue});
 }
 SketchCanvas.init = function(x, y, c){
-  SketchCanvas.issue = null;
   var style = function(){};
   style['canvas'] = new Style({
     'position' : 'absolute', "top" : y - 150, "left" : x - 150,
@@ -73,7 +73,7 @@ SketchCanvas.init = function(x, y, c){
     "width" : 260, "height" : 240, 'background-color' : c,
     "font-size" : "40px"});
   SketchCanvas.elements = $.map(['canvas', 'button', 'input'], function(type){
-      var element = generateElement(type, {"style" : style[type], "id" : "sketch_canvas_" + type});
+    var element = generateElement(type, {"style" : style[type], "id" : "sketch_canvas_" + type});
     SketchCanvas[type] = element;
     return element;
   }
@@ -82,9 +82,9 @@ SketchCanvas.init = function(x, y, c){
   var keyDownCode = 0;
   $("#sketch_canvas_input").keydown(function(e){keyDownCode = e.which;});
   $("#sketch_canvas_input").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
-      submit_idea();
-      //add_idea(SketchCanvas['input'].value);
-      }});
+    submit_idea();
+    //add_idea(SketchCanvas['input'].value);
+  }});
 
   SketchCanvas.clear(0);
 }
@@ -107,25 +107,38 @@ SketchCanvas.clear = function(duration){
 }
 
 var idea_list = [];
-function add_idea(idea, left, top){
-  var left = left || random() * screen.width;
-  var top = top || random() * screen.height;
+function add_idea(idea){
+  var left = idea.left || random() * screen.width;
+  var top = idea.top || random() * screen.height;
 
   SketchCanvas.clear();
-  if($.inArray(idea, idea_list) == -1){idea_list.push(idea);}else{return;}
+  if($.inArray(idea.idea, idea_list) > -1){return;}
 
   var idea_canvas = generateElement('canvas', {"style" : new Style({
-    "position" : "absolute",
-    "top" : top, "left" : left,
+    "position" : "absolute", "top" : top, "left" : left,
     "width" : 150, "height" : 100, "background-color" : "#c0ffee"}),
-      "id" : idea.toString().escape()});
+    "id" : idea.idea.escape()});
   $("#" + idea_canvas.id).draggable();
   ctx = idea_canvas.getContext("2d");
   ctx.font = "50px Helvetica";
-  ctx.fillText(idea, 0, 40);
+  ctx.fillText(idea.idea, 0, 40);
+
+  idea_canvas.addEventListener('click', function(){
+    idea_list.clear();
+    issue = idea._id;
+    $.map(idea.children, function(id){
+      socket.emit('get_idea', id);
+    });
+  }, true);
+
+  idea_list.push(idea_canvas);
 }
-
-
+idea_list.clear = function(){
+  while(idea_list.length){
+    var element = idea_list.pop();
+    document.body.removeChild(element);
+  }
+}
 
 
 
@@ -136,18 +149,21 @@ function add_idea(idea, left, top){
       function onclick(){
         switch(SketchCanvas.state){
           case 'active':
-            SketchCanvas.clear(); break;
+            SketchCanvas.clear();
+            break;
           case 'inactive':
             SketchCanvas.display(); break;
         }
       }
 
-  socket.on('add_idea', function(msg){
-    add_idea(msg.idea.toString(), msg.left, msg.top);
-  });
-  socket.on('init_idea', function(msg){
-    add_idea(msg.idea.toString(), msg.left, msg.top);
-  });
+      socket.on('transit', function(new_issue){
+        issue = new_issue;
+        socket.emit("init_bord", issue);
+      });
+      socket.on('add_idea', function(idea){
+        add_idea(idea);
+      });
+
     </script>
   </body>
 </html>
