@@ -1,4 +1,3 @@
-
 var $ = require('jquery');
 
 function p(arg){
@@ -19,7 +18,7 @@ var Schema = mongoose.Schema;
 var Idea = mongoose.model("Idea", Schema({
 //var Idea = db.model("Idea", Schema({
   "idea":String, "idea_type" : Number,
-  "parent":Schema.Types.ObjectId, "children":Array
+  "issue":Schema.Types.ObjectId, "children":Array
 }));
 
 app.get('/', function(req, res){
@@ -29,28 +28,39 @@ app.get('/', function(req, res){
 function register_idea(msg){
   var idea = new Idea({
     "idea" : msg.idea, "idea_type" : msg.type,
-    "parent" : msg.issue, "children" : []});
+    "issue" : msg.issue, "children" : []});
   idea.save();
   return idea;
 }
 
 io.on('connection', function(socket){
-  //io.emit("add_idea", {"idea" : "Root Idea", "idea_type" : -1});
-  socket.emit("transit", register_idea({"idea" : "Root Idea", "children" : [], "parent" : null, "idea_type" : -1})._id);
+  Idea.findOne({"issue" : null}, function(err, root){
+    var issue_idea;
+    if( ! root){
+      p("adding issue");
+      root = register_idea({
+        "idea" : "Root Idea", "idea_type" : -1,
+        "children" : [], "issue" : null});
+    }
+    socket.emit("transit", root.id);
+  });
 
   socket.on("init_bord", function(issue){
     console.log("issue = " + issue);
-    Idea.find({"_id" : issue}, function(err, parent_idea){
-      parent_idea[0].children.forEach(function(idea){
-        socket.emit("add_idea", idea);
+    Idea.find({"_id" : issue}, function(err, issue_idea){
+      issue_idea[0].children.forEach(function(idea_id){
+        Idea.findOne({"_id" : idea_id}, function(err, idea){
+          socket.emit("add_idea", idea);
+        });
       });
     });
   });
 
-  function register_child(parent_id, child_id){
-    Idea.findOne({"_id" : parent_id}, function(err, parent_idea){
-      parent_idea.children.push(child_id);
-      parent_idea.save();
+  function register_child(issue_id, child_id){
+    p("issue_id = " + issue_id);
+    Idea.findOne({"_id" : issue_id}, function(err, issue_idea){
+      issue_idea.children.push(child_id);
+      issue_idea.save();
     });
   }
   socket.on('submit_idea', function(msg){
@@ -60,8 +70,6 @@ io.on('connection', function(socket){
   });
 
   socket.on('get_idea', function(id){
-    console,log('get_idea');
-    console.log(Idea.find({"_id" : id}).idea);
     Idea.find({"_id" : id}, function(err, ideas){
       //console.log(ideas[0].idea);
       socket.emit("add_idea", ideas[0]);
