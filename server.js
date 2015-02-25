@@ -46,8 +46,8 @@ io.on('connection', function(socket){
 
   socket.on("init_bord", function(issue){
     console.log("issue = " + issue);
-    Idea.find({"_id" : issue}, function(err, issue_idea){
-      issue_idea[0].children.forEach(function(idea_id){
+    Idea.findOne({"_id" : issue}, function(err, issue_idea){
+      issue_idea.children.forEach(function(idea_id){
         Idea.findOne({"_id" : idea_id}, function(err, idea){
           socket.emit("add_idea", idea);
         });
@@ -56,6 +56,7 @@ io.on('connection', function(socket){
   });
 
   function register_child(issue_id, child_id){
+    p("issue_id = " + issue_id);
     Idea.findOne({"_id" : issue_id}, function(err, issue_idea){
       issue_idea.children.push(child_id);
       issue_idea.save();
@@ -67,11 +68,36 @@ io.on('connection', function(socket){
     register_child(msg.issue, idea.id);
   });
 
+  function delete_idea(idea_id){
+    Idea.findOne({"_id" : idea_id}, function(err, idea){
+      idea.children.forEach(function(child){
+        delete_idea(child);
+      });
+    });
+    p(idea_id);
+    Idea.find({"_id" : idea_id}).remove().exec();
+  }
+  socket.on("delete_idea", function(idea_id){
+    // delete from parent
+    Idea.findOne({"_id" : idea_id}, function(err, idea){
+      Idea.findOne({"_id" : idea.issue}, function(err, issue){
+        issue.children = issue.children.filter(function(children, i){
+          return(children != idea_id);
+        });
+        issue.save();
+      });
+    });
+    // delete children
+    delete_idea(idea_id);
+  });
+
+  /*
   socket.on('get_idea', function(id){
     Idea.find({"_id" : id}, function(err, ideas){
       socket.emit("add_idea", ideas[0]);
     });
   });
+  */
 });
 
 http.listen(3000, function(){
