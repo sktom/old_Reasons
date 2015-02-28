@@ -126,45 +126,46 @@ function add_idea(idea){
   if(FloatingCanvasList.include(idea.idea)){return;};
   //if($.inArray(idea.idea, idea_list) > -1){return;}
 
-  var idea_canvas = generateElement('canvas', {"style" : new Style({
+  var floating_canvas = generateElement('canvas', {"style" : new Style({
     "position" : "absolute", "top" : top, "left" : left,
     "width" : 150, "height" : 100, "background-color" : "#c0ffee"}),
     "id" : idea.idea.escape()});
-  $("#" + idea_canvas.id).draggable();
-  ctx = idea_canvas.getContext("2d");
+  $("#" + floating_canvas.id).draggable();
+  ctx = floating_canvas.getContext("2d");
   ctx.font = "50px Helvetica";
   ctx.fillText(idea.idea, 0, 40);
+  floating_canvas.idea_id = idea._id;
 
-  $("#" + idea_canvas.id).mousedown(function(e){
+  $("#" + floating_canvas.id).mousedown(function(e){
     switch(e.which){
     case 1:
-      idea_canvas.addEventListener('click', function(){
+      floating_canvas.addEventListener('click', function(){
         transit(idea._id);
       }, true); break;
     case 3:
-      delete_idea(idea, idea_canvas); break;
+      delete_idea(idea, floating_canvas); break;
     }
   });
 
-  FloatingCanvasList.push(idea_canvas);
+  FloatingCanvasList.push(floating_canvas);
 }
-function delete_idea(idea, idea_canvas){
+function delete_idea(idea, floating_canvas){
   socket.emit("delete_idea", idea._id);
-  FloatingCanvasList.remove(idea_canvas);
+}
+function delete_floating_canvas(floating_canvas){
+  FloatingCanvasList.remove(floating_canvas);
 }
 
 FloatingCanvasList = function(){}
 FloatingCanvasList.entity = [];
-FloatingCanvasList.push = function(idea_canvas){this.entity.push(idea_canvas);}
-FloatingCanvasList.remove = function(idea_canvas){
-  p(this.entity.length);
-  this.entity = this.entity.eliminate(idea_canvas);
-  p(this.entity.length);
-  document.body.removeChild(idea_canvas);
+FloatingCanvasList.push = function(floating_canvas){this.entity.push(floating_canvas);}
+FloatingCanvasList.remove = function(floating_canvas){
+  this.entity = this.entity.eliminate(floating_canvas);
+  document.body.removeChild(floating_canvas);
 }
 FloatingCanvasList.include = function(idea){
-  return this.entity.map(function(idea_canvas){
-    return idea_canvas.idea
+  return this.entity.map(function(floating_canvas){
+    return floating_canvas.idea
   }).include(idea);
 }
 FloatingCanvasList.clear = function(){
@@ -173,7 +174,15 @@ FloatingCanvasList.clear = function(){
     document.body.removeChild(element);
   }
 }
-
+FloatingCanvasList.find_by_id = function(idea_id){
+  var arr = FloatingCanvasList.entity;
+  var i = arr.map(function(canvas){return canvas.idea_id}).indexOf(idea_id);
+  if(i < 0){
+    return null;
+  }else{
+    return arr[i];
+  }
+}
 
 
 
@@ -220,6 +229,10 @@ FloatingCanvasList.clear = function(){
       });
       socket.on('add_idea', function(idea){
         add_idea(idea);
+      });
+      socket.on('delete_floating_canvas', function(idea_id){
+        fc = FloatingCanvasList.find_by_id(idea_id);
+        if(fc){FloatingCanvasList.remove(fc);}
       });
 
     </script>

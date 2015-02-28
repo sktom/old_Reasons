@@ -19,6 +19,17 @@ var Idea = mongoose.model("Idea", Schema({
   "idea":String, "idea_type" : Number,
   "issue":Schema.Types.ObjectId, "children":Array
 }));
+Idea.ifExist = function(idea_id, cb_if_exist, cb_if_not){
+  Idea.find({"_id" : idea_id}, function(err, idea_list){
+    idea = idea_list[0];
+    if(idea){
+      cb_if_exist(idea_id, idea);
+    }else{
+      cb_if_not(idea_id);
+    }
+  }).limit(1)
+}
+
 
 app.get('/', function(req, res){
   res.sendfile('index.html');
@@ -56,7 +67,6 @@ io.on('connection', function(socket){
   });
 
   function register_child(issue_id, child_id){
-    p("issue_id = " + issue_id);
     Idea.findOne({"_id" : issue_id}, function(err, issue_idea){
       issue_idea.children.push(child_id);
       issue_idea.save();
@@ -74,30 +84,23 @@ io.on('connection', function(socket){
         delete_idea(child);
       });
     });
-    p(idea_id);
     Idea.find({"_id" : idea_id}).remove().exec();
   }
   socket.on("delete_idea", function(idea_id){
-    // delete from parent
-    Idea.findOne({"_id" : idea_id}, function(err, idea){
+    Idea.ifExist(idea_id, function(idea_id, idea){
       Idea.findOne({"_id" : idea.issue}, function(err, issue){
         issue.children = issue.children.filter(function(children, i){
           return(children != idea_id);
         });
         issue.save();
       });
-    });
-    // delete children
-    delete_idea(idea_id);
+      // delete children
+      delete_idea(idea_id);
+      // delete from every client
+      io.emit("delete_floating_canvas", idea_id);
+    }, function(idea_id){return;});
   });
 
-  /*
-  socket.on('get_idea', function(id){
-    Idea.find({"_id" : id}, function(err, ideas){
-      socket.emit("add_idea", ideas[0]);
-    });
-  });
-  */
 });
 
 http.listen(3000, function(){
