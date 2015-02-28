@@ -57,7 +57,7 @@ var SketchCanvas = function(){};
 SketchCanvas.id = 'sketch_canvas';
 
 emit_idea = function(){
-  socket.emit("add_idea", {"idea" : SketchCanvas["input"].value});
+  socket.emit("add_idea", {"idea" : SketchCanvas["textarea"].value});
 }
 SketchCanvas.init = function(x, y, c){
   var style = function(){};
@@ -67,11 +67,11 @@ SketchCanvas.init = function(x, y, c){
   style['button'] = new Style({
     'position' : 'absolute', "top" : y + 110, "left" : x - 130,
     "width" : 240, "height" : 30, 'background-color' : c});
-  style['input'] = new Style({
+  style['textarea'] = new Style({
     'position' : 'absolute', "top" : y - 140, "left" : x - 140,
     "width" : 260, "height" : 240, 'background-color' : c,
     "font-size" : "40px"});
-  SketchCanvas.elements = $.map(['canvas', 'button', 'input'], function(type){
+  SketchCanvas.elements = $.map(['canvas', 'button', 'textarea'], function(type){
     var element = generateElement(type, style[type], "sketch_canvas_" + type);
     SketchCanvas[type] = element;
     return element;
@@ -79,10 +79,10 @@ SketchCanvas.init = function(x, y, c){
 );
   SketchCanvas["button"].addEventListener('click', emit_idea, true);
   var keyDownCode = 0;
-  $("#sketch_canvas_input").keydown(function(e){keyDownCode = e.which;});
-  $("#sketch_canvas_input").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
+  $("#sketch_canvas_textarea").keydown(function(e){keyDownCode = e.which;});
+  $("#sketch_canvas_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
       emit_idea();
-      //add_idea(SketchCanvas['input'].value);
+      //add_idea(SketchCanvas['textarea'].value);
       }});
 
   SketchCanvas.clear(0);
@@ -93,7 +93,7 @@ SketchCanvas.display = function(duration){
   $.each(SketchCanvas.elements, function(key, value){
     $('#' + value.id).show(duration);
   })
-  $("#sketch_canvas_input").focus();
+  $("#sketch_canvas_textarea").focus();
   SketchCanvas.state = 'active';
 }
 SketchCanvas.clear = function(duration){
@@ -101,7 +101,7 @@ SketchCanvas.clear = function(duration){
   $.each(SketchCanvas.elements, function(key, value){
     $('#' + value.id).hide(duration);
   })
-  SketchCanvas.input.value = "";
+  SketchCanvas.textarea.value = "";
   SketchCanvas.state = 'inactive';
 }
 
