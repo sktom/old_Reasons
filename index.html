@@ -11,10 +11,17 @@
   <body>
     <canvas id = "background_canvas" style = "background-color:#eeeeee"></canvas>
 
-    <script type = "text/javascript">
+  <script type = "text/javascript">
 
 function p(arg){
   alert(arg);
+}
+
+Array.prototype.eliminate = function(target){
+  return this.filter(function(element){ return(element!=target)});
+}
+Array.prototype.include = function(element){
+  return this.indexOf(element) > 0;
 }
 
 Style = function(pref){
@@ -32,11 +39,12 @@ Style.prototype.toString = function(){
   }).join("-");
 }
 
-function generateElement(type, style, id){
+function generateElement(type, option){
   var element = document.createElement(type);
   document.body.appendChild(element);
-  element.id = id || style.toString();
-  $("#" + element.id).css(style);
+  element.id = option.id || style.toString();
+  $("#" + element.id).css(option.style);
+  $("#" + element.id).bind('contextmenu', function(e){return false;}); 
   return element;
 }
 
@@ -49,15 +57,26 @@ String.prototype.escape = function() {
   return this.replace(/[\`\~\!\@\#\$\%\^\&\*\(\)\{\}\[\]\?\\\/\s\t]/g,'')
 }
 
+Array.prototype.last = function(){
+  return this[this.length - 1];
+}
 
+
+var issue;
+var issue_tree = [];
 
 var socket = io();                                                        
 
 var SketchCanvas = function(){};
 SketchCanvas.id = 'sketch_canvas';
 
+<<<<<<< HEAD
 emit_idea = function(){
   socket.emit("add_idea", {"idea" : SketchCanvas["textarea"].value});
+=======
+submit_idea = function(){
+  socket.emit("submit_idea", {"idea" : SketchCanvas["input"].value, "issue" : issue});
+>>>>>>> 463dc88e747e66184d73cb33b29ebe26472fe804
 }
 SketchCanvas.init = function(x, y, c){
   var style = function(){};
@@ -71,19 +90,31 @@ SketchCanvas.init = function(x, y, c){
     'position' : 'absolute', "top" : y - 140, "left" : x - 140,
     "width" : 260, "height" : 240, 'background-color' : c,
     "font-size" : "40px"});
+<<<<<<< HEAD
   SketchCanvas.elements = $.map(['canvas', 'button', 'textarea'], function(type){
     var element = generateElement(type, style[type], "sketch_canvas_" + type);
+=======
+  SketchCanvas.elements = $.map(['canvas', 'button', 'input'], function(type){
+    var element = generateElement(type, {"style" : style[type], "id" : "sketch_canvas_" + type});
+>>>>>>> 463dc88e747e66184d73cb33b29ebe26472fe804
     SketchCanvas[type] = element;
     return element;
   }
 );
-  SketchCanvas["button"].addEventListener('click', emit_idea, true);
+  SketchCanvas["button"].addEventListener('click', submit_idea, true);
   var keyDownCode = 0;
+<<<<<<< HEAD
   $("#sketch_canvas_textarea").keydown(function(e){keyDownCode = e.which;});
   $("#sketch_canvas_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
       emit_idea();
       //add_idea(SketchCanvas['textarea'].value);
       }});
+=======
+  $("#sketch_canvas_input").keydown(function(e){keyDownCode = e.which;});
+  $("#sketch_canvas_input").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
+    submit_idea();
+  }});
+>>>>>>> 463dc88e747e66184d73cb33b29ebe26472fe804
 
   SketchCanvas.clear(0);
 }
@@ -105,33 +136,91 @@ SketchCanvas.clear = function(duration){
   SketchCanvas.state = 'inactive';
 }
 
-var idea_list = [];
-function add_idea(idea, left, top){
-  var left = left || random() * screen.width;
-  var top = top || random() * screen.height;
+function add_idea(idea){
+  var left = idea.left || random() * screen.width;
+  var top = idea.top || random() * screen.height;
 
   SketchCanvas.clear();
-  if($.inArray(idea, idea_list) == -1){idea_list.push(idea);}else{return;}
+  if(FloatingCanvasList.include(idea.idea)){return;};
+  //if($.inArray(idea.idea, idea_list) > -1){return;}
 
-  var idea_canvas = generateElement('canvas', new Style({
-    "position" : "absolute",
-    "top" : top, "left" : left,
+  var floating_canvas = generateElement('canvas', {"style" : new Style({
+    "position" : "absolute", "top" : top, "left" : left,
     "width" : 150, "height" : 100, "background-color" : "#c0ffee"}),
-    idea.toString().escape());
-  $("#" + idea_canvas.id).draggable();
-  ctx = idea_canvas.getContext("2d");
+    "id" : idea.idea.escape()});
+  $("#" + floating_canvas.id).draggable();
+  ctx = floating_canvas.getContext("2d");
   ctx.font = "50px Helvetica";
-  ctx.fillText(idea, 0, 40);
+  ctx.fillText(idea.idea, 0, 40);
+  floating_canvas.idea_id = idea._id;
+
+  $("#" + floating_canvas.id).mousedown(function(e){
+    switch(e.which){
+    case 1:
+      floating_canvas.addEventListener('click', function(){
+        transit(idea._id);
+      }, true); break;
+    case 3:
+      delete_idea(idea, floating_canvas); break;
+    }
+  });
+
+  FloatingCanvasList.push(floating_canvas);
+}
+function delete_idea(idea, floating_canvas){
+  socket.emit("delete_idea", idea._id);
+}
+function delete_floating_canvas(floating_canvas){
+  FloatingCanvasList.remove(floating_canvas);
 }
 
+FloatingCanvasList = function(){}
+FloatingCanvasList.entity = [];
+FloatingCanvasList.push = function(floating_canvas){this.entity.push(floating_canvas);}
+FloatingCanvasList.remove = function(floating_canvas){
+  this.entity = this.entity.eliminate(floating_canvas);
+  document.body.removeChild(floating_canvas);
+}
+FloatingCanvasList.include = function(idea){
+  return this.entity.map(function(floating_canvas){
+    return floating_canvas.idea
+  }).include(idea);
+}
+FloatingCanvasList.clear = function(){
+  while(this.entity.length){
+    var element = this.entity.pop();
+    document.body.removeChild(element);
+  }
+}
+FloatingCanvasList.find_by_id = function(idea_id){
+  var arr = FloatingCanvasList.entity;
+  var i = arr.map(function(canvas){return canvas.idea_id}).indexOf(idea_id);
+  if(i < 0){
+    return null;
+  }else{
+    return arr[i];
+  }
+}
 
 
 
       SketchCanvas.init($(window).width() / 2, $(window).height() / 2, '#c0ffee');
       $("#background_canvas").width($(window).width()).height($(window).height()).css("opacity", "0.8");
-      background_canvas.addEventListener('click', onclick, false);
 
-      function onclick(){
+
+      $("#background_canvas").bind('contextmenu', function(e){
+        return false;
+      }); 
+
+      $("#background_canvas").mouseup(function(e){
+          switch(e.which){
+          case 1:
+            on_left_click(); break;
+          case 3:
+            on_right_click(); break;
+          }
+      });
+      function on_left_click(){
         switch(SketchCanvas.state){
           case 'active':
             SketchCanvas.clear(); break;
@@ -139,13 +228,31 @@ function add_idea(idea, left, top){
             SketchCanvas.display(); break;
         }
       }
+      function on_right_click(){
+        transit(issue_tree[issue_tree.length - 2]);
+      }
 
-  socket.on('add_idea', function(msg){
-    add_idea(msg.idea.toString(), msg.left, msg.top);
-  });
-  socket.on('init_idea', function(msg){
-    add_idea(msg.idea.toString(), msg.left, msg.top);
-  });
+      function transit(new_issue){
+        if( ! new_issue){return;}
+        issue = new_issue;
+        issue_tree.push(issue);
+        while(issue_tree.indexOf(issue) + 1 < issue_tree.length){
+          issue_tree.pop();
+        }
+        FloatingCanvasList.clear();
+        socket.emit("init_bord", issue);
+      }
+      socket.on('transit', function(new_issue){
+        transit(new_issue);
+      });
+      socket.on('add_idea', function(idea){
+        add_idea(idea);
+      });
+      socket.on('delete_floating_canvas', function(idea_id){
+        fc = FloatingCanvasList.find_by_id(idea_id);
+        if(fc){FloatingCanvasList.remove(fc);}
+      });
+
     </script>
   </body>
 </html>
