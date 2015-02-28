@@ -70,13 +70,8 @@ var socket = io();
 var SketchCanvas = function(){};
 SketchCanvas.id = 'sketch_canvas';
 
-<<<<<<< HEAD
-emit_idea = function(){
-  socket.emit("add_idea", {"idea" : SketchCanvas["textarea"].value});
-=======
 submit_idea = function(){
-  socket.emit("submit_idea", {"idea" : SketchCanvas["input"].value, "issue" : issue});
->>>>>>> 463dc88e747e66184d73cb33b29ebe26472fe804
+  socket.emit("submit_idea", {"idea" : SketchCanvas["textarea"].value, "issue" : issue});
 }
 SketchCanvas.init = function(x, y, c){
   var style = function(){};
@@ -90,31 +85,18 @@ SketchCanvas.init = function(x, y, c){
     'position' : 'absolute', "top" : y - 140, "left" : x - 140,
     "width" : 260, "height" : 240, 'background-color' : c,
     "font-size" : "40px"});
-<<<<<<< HEAD
   SketchCanvas.elements = $.map(['canvas', 'button', 'textarea'], function(type){
-    var element = generateElement(type, style[type], "sketch_canvas_" + type);
-=======
-  SketchCanvas.elements = $.map(['canvas', 'button', 'input'], function(type){
     var element = generateElement(type, {"style" : style[type], "id" : "sketch_canvas_" + type});
->>>>>>> 463dc88e747e66184d73cb33b29ebe26472fe804
     SketchCanvas[type] = element;
     return element;
   }
 );
   SketchCanvas["button"].addEventListener('click', submit_idea, true);
   var keyDownCode = 0;
-<<<<<<< HEAD
   $("#sketch_canvas_textarea").keydown(function(e){keyDownCode = e.which;});
   $("#sketch_canvas_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
-      emit_idea();
-      //add_idea(SketchCanvas['textarea'].value);
-      }});
-=======
-  $("#sketch_canvas_input").keydown(function(e){keyDownCode = e.which;});
-  $("#sketch_canvas_input").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
     submit_idea();
   }});
->>>>>>> 463dc88e747e66184d73cb33b29ebe26472fe804
 
   SketchCanvas.clear(0);
 }
