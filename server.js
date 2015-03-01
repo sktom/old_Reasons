@@ -27,36 +27,35 @@ Idea.ifExist = function(idea_id, cb_if_exist, cb_if_not){
     }else{
       cb_if_not(idea_id);
     }
-  }).limit(1)
+  },{limit:1});
 }
 Idea.with_specified_idea = function(idea_id, cb){
-  p("sp "+idea_id);
   Idea.find({"_id" : idea_id}, function(err, idea_list){
     if(err){p("ERROR:Faild to specify an Idea by ID");}
-    p(idea_list.length);
     if( ! (idea_list.length == 1)){p("idea should be specified");}
     cb(idea_list[0]);
-  }).limit(1);
+    p("sthsthsthsthsthsthsSHT");
+  },{limit:1});
 }
 Idea.with_parent_idea = function(parent_id, cb){
   Idea.find({"_id" : parent_id}, function(err, issue_idea_list){
     cb(parent_idea_list[0]);
-  }).limit(1);
+  },{limit:1});
 }
 Idea.with_each_child = function(parent_id, cb){
   Idea.find({"_id" : parent_id}, function(err, issue_idea_list){
     issue_idea_list[0].children.forEach(function(child_id){
       Idea.find({"_id" : child_id}, function(err, child_idea_list){
         cb(child_idea_list[0]);
-      }).limit(1);
+      },{limit:1});
     });
-  }).limit(1);
+  },{limit:1});
 }
 Idea.with_children_id = function(parent_id, cb){
   Idea.find({"_id" : parent_id}, function(err, parent_idea_list){
     if(parent_idea_list.length == 0){return;}
     cb(parent_idea_list[0].children);
-  }).limit(1);
+  },{limit:1});
 }
 
 
@@ -95,17 +94,16 @@ io.on('connection', function(socket){
 
   socket.on("update", function(existing_id_list, issue){
     Idea.with_children_id(issue, function(brother_id_list){
-      id_list_to_add = brother_id_list.filter(function(e){return( ! (e in existing_id_list));});
-      id_list_to_delete = existing_id_list.filter(function(e){return( ! (e in brother_id_list));});
+      id_list_to_add = brother_id_list.filter(function(e){return(existing_id_list.indexOf(e) < 0);});
+      id_list_to_delete = existing_id_list.filter(function(e){return(brother_id_list.indexOf(e) < 0);});
+      p("ilta_l"+id_list_to_add.length);
       id_list_to_add.forEach(function(idea_id){
         Idea.with_specified_idea(idea_id, function(idea){
           socket.emit("add_idea", idea);
         });
       });
       id_list_to_delete.forEach(function(idea_id){
-        Idea.with_specified_idea(idea_id, function(idea){
-          socket.emit("delete_floating_canvas", idea);
-        });
+        socket.emit("delete_floating_canvas", idea_id);
       });
     });
   });
@@ -118,7 +116,7 @@ io.on('connection', function(socket){
   }
   socket.on('submit_idea', function(msg){
     var idea = register_idea(msg);
-//    io.emit('add_idea', idea);
+    socket.emit('add_idea', idea);
     register_child(msg.issue, idea.id);
   });
 
