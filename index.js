@@ -9,7 +9,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/Reasons');
+//mongoose.connect('mongodb://wosskt:rte00332@ds049641.mongolab.com:49641/heroku_app34464574');
+mongoose.connect('mongodb://heroku_app34464574:n2dj90ulmhku2drninfts7395q@ds049641.mongolab.com:49641/heroku_app34464574');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
