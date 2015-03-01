@@ -42,7 +42,7 @@ Style.prototype.toString = function(){
 function generateElement(type, option){
   var element = document.createElement(type);
   document.body.appendChild(element);
-  element.id = option.id || style.toString();
+  element.id = option.id || option.style.toString();
   $("#" + element.id).css(option.style);
   $("#" + element.id).bind('contextmenu', function(e){return false;}); 
   return element;
@@ -91,7 +91,7 @@ SketchCanvas.init = function(x, y, c){
     return element;
   }
 );
-  SketchCanvas["button"].addEventListener('click', submit_idea, true);
+  SketchCanvas["button"].addEventListener("click", submit_idea, true);
   var keyDownCode = 0;
   $("#sketch_canvas_textarea").keydown(function(e){keyDownCode = e.which;});
   $("#sketch_canvas_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
@@ -107,15 +107,15 @@ SketchCanvas.display = function(duration){
     $('#' + value.id).show(duration);
   })
   $("#sketch_canvas_textarea").focus();
-  SketchCanvas.state = 'active';
+  SketchCanvas.state = "active";
 }
 SketchCanvas.clear = function(duration){
   if(duration == null){duration = 500;}
   $.each(SketchCanvas.elements, function(key, value){
-    $('#' + value.id).hide(duration);
+    $("#" + value.id).hide(duration);
   })
   SketchCanvas.textarea.value = "";
-  SketchCanvas.state = 'inactive';
+  SketchCanvas.state = "inactive";
 }
 
 function add_idea(idea){
@@ -150,6 +150,7 @@ function add_idea(idea){
   FloatingCanvasList.push(floating_canvas);
 }
 function delete_idea(idea, floating_canvas){
+  delete_floating_canvas(floating_canvas);
   socket.emit("delete_idea", idea._id);
 }
 function delete_floating_canvas(floating_canvas){
@@ -165,7 +166,7 @@ FloatingCanvasList.remove = function(floating_canvas){
 }
 FloatingCanvasList.include = function(idea){
   return this.entity.map(function(floating_canvas){
-    return floating_canvas.idea
+    return floating_canvas.idea;
   }).include(idea);
 }
 FloatingCanvasList.clear = function(){
@@ -182,6 +183,9 @@ FloatingCanvasList.find_by_id = function(idea_id){
   }else{
     return arr[i];
   }
+}
+FloatingCanvasList.get_id_list = function(){
+  return this.entity.map(function(e){return e.idea_id});
 }
 
 
@@ -204,9 +208,9 @@ FloatingCanvasList.find_by_id = function(idea_id){
       });
       function on_left_click(){
         switch(SketchCanvas.state){
-          case 'active':
+          case "active":
             SketchCanvas.clear(); break;
-          case 'inactive':
+          case "inactive":
             SketchCanvas.display(); break;
         }
       }
@@ -222,7 +226,8 @@ FloatingCanvasList.find_by_id = function(idea_id){
           issue_tree.pop();
         }
         FloatingCanvasList.clear();
-        socket.emit("init_bord", issue);
+        //socket.emit("init_bord", issue);
+        refresh_bord();
       }
       socket.on('transit', function(new_issue){
         transit(new_issue);
@@ -235,6 +240,11 @@ FloatingCanvasList.find_by_id = function(idea_id){
         if(fc){FloatingCanvasList.remove(fc);}
       });
 
+      function refresh_bord(){
+        var current_id_list = FloatingCanvasList.get_id_list();
+        socket.emit("update", current_id_list, issue);
+      }
+setInterval("refresh_bord()", 10000);
     </script>
   </body>
 </html>
