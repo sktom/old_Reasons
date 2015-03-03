@@ -1,17 +1,21 @@
 
 <!DOCTYPE html>
-<html>
+<html style = "background-color:rgba(0,0,0,0.2)">
   <head>
-    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+    <script src = "https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
     <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <link rel = "stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 
     <style type = "text/css">*{margin : 0; padding : 0;}</style>
   </head>
   <body>
-    <canvas id = "background_canvas" style = "background-color:#eeeeee"></canvas>
+    <canvas id = "background_canvas" style = "background-color:rgba(0,0,0,0.0)"></canvas>
 
   <script type = "text/javascript">
+    $("#background_canvas").mouseover(function(e){
+      focus_out();
+    });
 
 function p(arg){
   alert(arg);
@@ -66,6 +70,8 @@ var issue;
 var issue_tree = [];
 
 var socket = io();                                                        
+
+var focused_canvas;
 
 var SketchCanvas = function(){};
 SketchCanvas.id = 'sketch_canvas';
@@ -126,10 +132,10 @@ function add_idea(idea){
   if(FloatingCanvasList.include(idea.idea)){return;};
   //if($.inArray(idea.idea, idea_list) > -1){return;}
 
-  var floating_canvas = generateElement('canvas', {"style" : new Style({
+  var style = new Style({
     "position" : "absolute", "top" : top, "left" : left,
-    "width" : 150, "height" : 100, "background-color" : "#c0ffee"}),
-    "id" : idea.idea.escape()});
+    "width" : 150, "height" : 100, "background-color" : "#c0ffee"});
+  var floating_canvas = generateElement('canvas', {"style" : style, "id" : idea.idea.escape()});
   $("#" + floating_canvas.id).draggable();
   ctx = floating_canvas.getContext("2d");
   ctx.font = "50px Helvetica";
@@ -146,6 +152,32 @@ function add_idea(idea){
       delete_idea(idea, floating_canvas); break;
     }
   });
+
+  var rating_slider_div = generateElement("div", {"style" : new Style({
+    "position" : "absolute", "width" : style.width, "top" : style.top + 100, "left" : style.left})
+  });
+  rating_slider_div.id = "slider_" + floating_canvas.id;
+  $("#" + rating_slider_div.id).slider();
+  //document.body.removeChild(rating_slider_div);
+
+  $("#" + floating_canvas.id).mouseover(function(e){
+    focus_on(floating_canvas);
+  });
+  floating_canvas.focus_on = function(){
+    $("#" + floating_canvas.id).css({"height" : style.height + 0});
+    document.body.appendChild(rating_slider_div);
+    $("#" + rating_slider_div.id).css({
+      "position" : "absolute", "width" : style.width, "top" : style.top + 100, "left" : style.left
+    });
+  }
+  floating_canvas.focus_out = function(){
+    $("#" + floating_canvas.id).css({"height" : style.height});
+    socket.emit("score", {
+      "idea_id" : floating_canvas.idea_id, "rating" : $("#"+rating_slider_div.id).slider("value")
+    });
+    document.body.removeChild(rating_slider_div);
+
+  }
 
   FloatingCanvasList.push(floating_canvas);
 }
@@ -239,6 +271,16 @@ FloatingCanvasList.get_id_list = function(){
         fc = FloatingCanvasList.find_by_id(idea_id);
         if(fc){FloatingCanvasList.remove(fc);}
       });
+
+      function focus_on(canvas){
+        focused_canvas = canvas;
+        focused_canvas.focus_on();
+      }
+      function focus_out(){
+        if( ! focused_canvas){return;}
+        focused_canvas.focus_out();
+        focused_canvas = null;
+      }
 
       function refresh_bord(){
         var current_id_list = FloatingCanvasList.get_id_list();

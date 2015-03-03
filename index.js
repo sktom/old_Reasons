@@ -16,8 +16,8 @@ db.once('open', function (callback) {
 });
 var Schema = mongoose.Schema;
 var Idea = mongoose.model("Idea", Schema({
-  "idea":String, "idea_type" : Number,
-  "issue":Schema.Types.ObjectId, "children":Array
+  "idea" : String, "idea_type" : Number,
+  "issue" : Schema.Types.ObjectId, "children" : Array, "rating" : Number
 }));
 Idea.ifExist = function(idea_id, cb_if_exist, cb_if_not){
   Idea.find({"_id" : idea_id}, function(err, idea_list){
@@ -34,7 +34,6 @@ Idea.with_specified_idea = function(idea_id, cb){
     if(err){p("ERROR:Faild to specify an Idea by ID");}
     if( ! (idea_list.length == 1)){p("idea should be specified");}
     cb(idea_list[0]);
-    p("sthsthsthsthsthsthsSHT");
   },{limit:1});
 }
 Idea.with_parent_idea = function(parent_id, cb){
@@ -66,7 +65,7 @@ app.get('/', function(req, res){
 function register_idea(msg){
   var idea = new Idea({
     "idea" : msg.idea, "idea_type" : msg.type,
-    "issue" : msg.issue, "children" : []});
+    "issue" : msg.issue, "children" : [], "rating" : 0});
   idea.save();
   return idea;
 }
@@ -78,7 +77,7 @@ io.on('connection', function(socket){
       p("adding issue");
       root = register_idea({
         "idea" : "Root Idea", "idea_type" : -1,
-        "children" : [], "issue" : null});
+        "children" : [], "issue" : null, "rating" : 0});
     }
     socket.emit("transit", root.id);
   });
@@ -96,7 +95,6 @@ io.on('connection', function(socket){
     Idea.with_children_id(issue, function(brother_id_list){
       id_list_to_add = brother_id_list.filter(function(e){return(existing_id_list.indexOf(e) < 0);});
       id_list_to_delete = existing_id_list.filter(function(e){return(brother_id_list.indexOf(e) < 0);});
-      p("ilta_l"+id_list_to_add.length);
       id_list_to_add.forEach(function(idea_id){
         Idea.with_specified_idea(idea_id, function(idea){
           socket.emit("add_idea", idea);
@@ -139,10 +137,13 @@ io.on('connection', function(socket){
       });
       // delete children
       delete_idea(idea_id);
-      // delete from every client
-//      socket.emit("delete_floating_canvas", idea_id);
     }, function(idea_id){return;});
   });
+
+  socket.on("score", function(score){
+    Idea.update({"_id" : score.idea_id}, {"rating" : score.rating}).exec();
+  });
+
 
 });
 
