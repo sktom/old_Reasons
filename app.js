@@ -4,7 +4,10 @@ function p(arg){
   console.log(arg);
 }
 
-var app = require('express')();
+var express = require('express');
+var app = express();
+app.set('view engine', 'ejs');
+app.use(express.static(__dirname + '/public'));
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
@@ -59,7 +62,8 @@ Idea.with_children_id = function(parent_id, cb){
 
 
 app.get('/', function(req, res){
-  res.sendfile('index.html');
+  //res.sendfile('index.html');
+  res.render('index');
 });
 
 function register_idea(msg){
