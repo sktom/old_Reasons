@@ -2,10 +2,10 @@
 <!DOCTYPE html>
 <html style = "background-color:rgba(0,0,0,0.2)">
   <head>
-    <!--
-    <script src = "https://code.jquery.com/jquery-1.11.2.min.js"></script>
-    -->
     <script src = "js/lib/jquery-1.11.2.min.js"></script>
+    <script src = "js/lib/utility.js"></script>
+    <script src = "js/lib/sketchcanvas.js"></script>
+    <script src = "js/lib/floatingcanvas.js"></script>
     <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
     <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
@@ -14,232 +14,28 @@
   </head>
   <body>
     <canvas id = "background_canvas" style = "background-color:rgba(0,0,0,0.0)"></canvas>
+    <script type = "text/javascript">
+      $("#background_canvas").mouseover(function(e){
+        focus_out();
+      });
 
-  <script type = "text/javascript">
-    $("#background_canvas").mouseover(function(e){
-      focus_out();
-    });
-
-function p(arg){
-  alert(arg);
-}
-
-Array.prototype.eliminate = function(target){
-  return this.filter(function(element){ return(element!=target)});
-}
-Array.prototype.include = function(element){
-  return this.indexOf(element) > 0;
-}
-
-Style = function(pref){
-  obj = this;
-  $.each(pref, function(k, v){
-    obj[k] = v;
-  });
-}
-
-Style.prototype.toString = function(){
-  var obj = this;
-  return $.map(Object.keys(this), function(k){
-    if(obj[k]==null){return "";}
-    return(k.toString().escape() + "_" + obj[k].toString().replace(/#/g, ''));
-  }).join("-");
-}
-
-function generateElement(type, option){
-  var element = document.createElement(type);
-  document.body.appendChild(element);
-  element.id = option.id || option.style.toString();
-  $("#" + element.id).css(option.style);
-  $("#" + element.id).bind('contextmenu', function(e){return false;}); 
-  return element;
-}
-
-function random(n){
-  if(n == null){n = 1;}
-  return Math.random() * n;
-}
-
-String.prototype.escape = function() {
-  return this.replace(/[\`\~\!\@\#\$\%\^\&\*\(\)\{\}\[\]\?\\\/\s\t]/g,'')
-}
-
-Array.prototype.last = function(){
-  return this[this.length - 1];
-}
-
-
-var issue;
-var issue_tree = [];
-
-var socket = io();                                                        
-
-var focused_canvas;
-
-var SketchCanvas = function(){};
-SketchCanvas.id = 'sketch_canvas';
-
-submit_idea = function(){
-  socket.emit("submit_idea", {"idea" : SketchCanvas["textarea"].value, "issue" : issue});
-}
-SketchCanvas.init = function(x, y, c){
-  var style = function(){};
-  style['canvas'] = new Style({
-    'position' : 'absolute', "top" : y - 150, "left" : x - 150,
-    "width" : 280, "height" : 300, 'background-color' : c});
-  style['button'] = new Style({
-    'position' : 'absolute', "top" : y + 110, "left" : x - 130,
-    "width" : 240, "height" : 30, 'background-color' : c});
-  style['textarea'] = new Style({
-    'position' : 'absolute', "top" : y - 140, "left" : x - 140,
-    "width" : 260, "height" : 240, 'background-color' : c,
-    "font-size" : "40px"});
-  SketchCanvas.elements = $.map(['canvas', 'button', 'textarea'], function(type){
-    var element = generateElement(type, {"style" : style[type], "id" : "sketch_canvas_" + type});
-    SketchCanvas[type] = element;
-    return element;
-  }
-);
-  SketchCanvas["button"].addEventListener("click", submit_idea, true);
-  var keyDownCode = 0;
-  $("#sketch_canvas_textarea").keydown(function(e){keyDownCode = e.which;});
-  $("#sketch_canvas_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
-    submit_idea();
-  }});
-
-  SketchCanvas.clear(0);
-}
-
-SketchCanvas.display = function(duration){
-  if(duration == null){duration = 500;}
-  $.each(SketchCanvas.elements, function(key, value){
-    $('#' + value.id).show(duration);
-  })
-  $("#sketch_canvas_textarea").focus();
-  SketchCanvas.state = "active";
-}
-SketchCanvas.clear = function(duration){
-  if(duration == null){duration = 500;}
-  $.each(SketchCanvas.elements, function(key, value){
-    $("#" + value.id).hide(duration);
-  })
-  SketchCanvas.textarea.value = "";
-  SketchCanvas.state = "inactive";
-}
-
-function add_idea(idea){
-  var left = idea.left || random() * screen.width;
-  var top = idea.top || random() * screen.height;
-
-  SketchCanvas.clear();
-  if(FloatingCanvasList.include(idea.idea)){return;};
-  //if($.inArray(idea.idea, idea_list) > -1){return;}
-
-  var style = new Style({
-    "position" : "absolute", "top" : top, "left" : left,
-    "width" : 150, "height" : 100, "background-color" : "#c0ffee"});
-  var floating_canvas = generateElement('canvas', {"style" : style, "id" : idea.idea.escape()});
-  $("#" + floating_canvas.id).draggable();
-  ctx = floating_canvas.getContext("2d");
-  ctx.font = "50px Helvetica";
-  ctx.fillText(idea.idea, 0, 40);
-  floating_canvas.idea_id = idea._id;
-
-  $("#" + floating_canvas.id).mousedown(function(e){
-    switch(e.which){
-    case 1:
-      floating_canvas.addEventListener('click', function(){
-        transit(idea._id);
-      }, true); break;
-    case 3:
-      delete_idea(idea, floating_canvas); break;
-    }
-  });
-
-  var rating_slider_div = generateElement("div", {"style" : new Style({
-    "position" : "absolute", "width" : style.width, "top" : style.top + 100, "left" : style.left})
-  });
-  rating_slider_div.id = "slider_" + floating_canvas.id;
-  $("#" + rating_slider_div.id).slider();
-  document.body.removeChild(rating_slider_div);
-
-  $("#" + floating_canvas.id).mouseover(function(e){
-    focus_on(floating_canvas);
-  });
-  floating_canvas.focus_on = function(){
-    $("#" + floating_canvas.id).css({"height" : style.height + 0});
-    document.body.appendChild(rating_slider_div);
-    $("#" + rating_slider_div.id).css({
-      "position" : "absolute", "width" : style.width, "top" : style.top + 100, "left" : style.left
-    });
-  }
-  floating_canvas.focus_out = function(){
-    $("#" + floating_canvas.id).css({"height" : style.height});
-    socket.emit("score", {
-      "idea_id" : floating_canvas.idea_id, "rating" : $("#"+rating_slider_div.id).slider("value")
-    });
-    document.body.removeChild(rating_slider_div);
-
-  }
-
-  FloatingCanvasList.push(floating_canvas);
-}
-function delete_idea(idea, floating_canvas){
-  delete_floating_canvas(floating_canvas);
-  socket.emit("delete_idea", idea._id);
-}
-function delete_floating_canvas(floating_canvas){
-  FloatingCanvasList.remove(floating_canvas);
-}
-
-FloatingCanvasList = function(){}
-FloatingCanvasList.entity = [];
-FloatingCanvasList.push = function(floating_canvas){this.entity.push(floating_canvas);}
-FloatingCanvasList.remove = function(floating_canvas){
-  this.entity = this.entity.eliminate(floating_canvas);
-  document.body.removeChild(floating_canvas);
-}
-FloatingCanvasList.include = function(idea){
-  return this.entity.map(function(floating_canvas){
-    return floating_canvas.idea;
-  }).include(idea);
-}
-FloatingCanvasList.clear = function(){
-  while(this.entity.length){
-    var element = this.entity.pop();
-    document.body.removeChild(element);
-  }
-}
-FloatingCanvasList.find_by_id = function(idea_id){
-  var arr = FloatingCanvasList.entity;
-  var i = arr.map(function(canvas){return canvas.idea_id}).indexOf(idea_id);
-  if(i < 0){
-    return null;
-  }else{
-    return arr[i];
-  }
-}
-FloatingCanvasList.get_id_list = function(){
-  return this.entity.map(function(e){return e.idea_id});
-}
-
-
+      var issue;
+      var issue_tree = [];
+      var socket = io();                                                        
+      var focused_canvas;
 
       SketchCanvas.init($(window).width() / 2, $(window).height() / 2, '#c0ffee');
       $("#background_canvas").width($(window).width()).height($(window).height()).css("opacity", "0.8");
-
-
       $("#background_canvas").bind('contextmenu', function(e){
         return false;
       }); 
-
       $("#background_canvas").mouseup(function(e){
-          switch(e.which){
+        switch(e.which){
           case 1:
             on_left_click(); break;
           case 3:
             on_right_click(); break;
-          }
+        }
       });
       function on_left_click(){
         switch(SketchCanvas.state){
@@ -285,12 +81,12 @@ FloatingCanvasList.get_id_list = function(){
         focused_canvas = null;
       }
 
-      function refresh_bord(){
-        var current_id_list = FloatingCanvasList.get_id_list();
-        socket.emit("update", current_id_list, issue);
-      }
+function refresh_bord(){
+  var current_id_list = FloatingCanvasList.get_id_list();
+  socket.emit("update", current_id_list, issue);
+}
 setInterval("refresh_bord()", 10000);
-    </script>
+</script>
   </body>
 </html>
 
