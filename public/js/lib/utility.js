@@ -3,33 +3,28 @@ function p(arg){
   alert(arg);
 }
 
+function stringize(obj){
+  return $.map(Object.keys(obj), function(k, v){
+    if(v == null){return "";}
+    return(k.toString().escape() + "_" + v.toString().replace(/#/g, ''));
+  }).join("-");
+}
+
 Array.prototype.eliminate = function(target){
-  return this.filter(function(element){ return(element!=target)});
+  return this.filter(function(element){return(element!=target)});
 }
 Array.prototype.include = function(element){
   return this.indexOf(element) > 0;
 }
 
-Style = function(pref){
-  obj = this;
-  $.each(pref, function(k, v){
-    obj[k] = v;
-  });
-}
-
-Style.prototype.toString = function(){
-  var obj = this;
-  return $.map(Object.keys(this), function(k){
-    if(obj[k]==null){return "";}
-    return(k.toString().escape() + "_" + obj[k].toString().replace(/#/g, ''));
-  }).join("-");
-}
-
-function generateElement(type, option){
+function generateElement(type, style){
+  style = style || {};
   var element = document.createElement(type);
-  document.body.appendChild(element);
-  element.id = option.id || option.style.toString();
-  $("#" + element.id).css(option.style);
+  element.id = style.id || stringize(style);
+  var parent_element = style.parent || document.body;
+  if( ! parent_element){return element;}
+  parent_element.appendChild(element);
+  if(style){$("#" + element.id).css(style);}
   $("#" + element.id).bind('contextmenu', function(e){return false;}); 
   return element;
 }
@@ -46,5 +41,4 @@ String.prototype.escape = function() {
 Array.prototype.last = function(){
   return this[this.length - 1];
 }
-
 

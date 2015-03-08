@@ -1,51 +1,53 @@
 
-var SketchCanvas = function(){};
-SketchCanvas.id = 'sketch_canvas';
+var PostingDiv = generateElement("div", {"id" : "posting_div"});
 
 submit_idea = function(){
-  socket.emit("submit_idea", {"idea" : SketchCanvas["textarea"].value, "issue" : issue});
+  socket.emit("submit_idea", {"idea" : PostingDiv["textarea"].value, "issue" : issue});
+  PostingDiv.clear(500);
 }
-SketchCanvas.init = function(x, y, c){
+PostingDiv.init = function(x, y, c){
+  document.body.appendChild(this);
   var style = function(){};
-  style['canvas'] = new Style({
-    'position' : 'absolute', "top" : y - 150, "left" : x - 150,
-    "width" : 280, "height" : 300, 'background-color' : c});
-  style['button'] = new Style({
-    'position' : 'absolute', "top" : y + 110, "left" : x - 130,
-    "width" : 240, "height" : 30, 'background-color' : c});
-  style['textarea'] = new Style({
-    'position' : 'absolute', "top" : y - 140, "left" : x - 140,
-    "width" : 260, "height" : 240, 'background-color' : c,
-    "font-size" : "40px"});
-  SketchCanvas.elements = $.map(['canvas', 'button', 'textarea'], function(type){
-    var element = generateElement(type, {"style" : style[type], "id" : "sketch_canvas_" + type});
-    SketchCanvas[type] = element;
+  style['canvas'] = {"top" : y - 150, "left" : x - 150, "width" : 280, "height" : 300};
+  style['button'] = {"top" : y + 110, "left" : x - 130, "width" : 240, "height" : 30};
+  style['textarea'] = {"top" : y - 140, "left" : x - 140, "width" : 260, "height" : 240,
+    "font-size" : "40px"};
+  PostingDiv.elements = $.map(['canvas', 'button', 'textarea'], function(type){
+    var element = generateElement(type, $.extend(style[type], {
+      "background-color" : c, "position" :  "absolute",
+      "id" : "posting_div_" + type, "parent" : PostingDiv
+    }));
+    PostingDiv[type] = element;
     return element;
   });
-  SketchCanvas["button"].addEventListener("click", submit_idea, true);
+  PostingDiv["button"].addEventListener("click", submit_idea, true);
   var keyDownCode = 0;
-  $("#sketch_canvas_textarea").keydown(function(e){keyDownCode = e.which;});
-  $("#sketch_canvas_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
+  $("#posting_div_textarea").keydown(function(e){keyDownCode = e.which;});
+  $("#posting_div_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
     submit_idea();
   }});
 
-  SketchCanvas.clear(0);
+  PostingDiv.clear(0);
 }
 
-SketchCanvas.display = function(duration){
+PostingDiv.display = function(duration){
   if(duration == null){duration = 500;}
-  $.each(SketchCanvas.elements, function(key, value){
-    $('#' + value.id).show(duration);
-  })
-  $("#sketch_canvas_textarea").focus();
-  SketchCanvas.state = "active";
+  $("#" + PostingDiv.id).show(duration);
+  //$.each(PostingDiv.elements, function(key, value){
+    //$('#' + value.id).show(duration);
+  //})
+  $("#posting_div_textarea").focus();
+  PostingDiv.state = "active";
 }
-SketchCanvas.clear = function(duration){
+PostingDiv.clear = function(duration){
   if(duration == null){duration = 500;}
-  $.each(SketchCanvas.elements, function(key, value){
+  $("#" + PostingDiv.id).hide(duration);
+  /*
+  $.each(PostingDiv.elements, function(key, value){
     $("#" + value.id).hide(duration);
   })
-  SketchCanvas.textarea.value = "";
-  SketchCanvas.state = "inactive";
+  */
+  PostingDiv.textarea.value = "";
+  PostingDiv.state = "inactive";
 }
 
