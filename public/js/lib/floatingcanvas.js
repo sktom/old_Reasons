@@ -6,44 +6,53 @@ function add_idea(idea){
   if(FloatingDivList.include(idea.idea)){return;};
   //if($.inArray(idea.idea, idea_list) > -1){return;}
 
-  var style = {"width" : 150, "height" : 0, "background-color" : "#c0ffee"};
-  var floating_div = generateElement("div", $.extend(style, {"id" : idea._id, "position" : "absolute", "top" : top, "left" : left}));
-  $("#" + floating_div.id).draggable();
-
-  /*
-  var floating_canvas = generateElement('canvas', {"parent" : floating_div, "style" : style, "id" : idea.idea.escape()});
-  floating_div.appendChild(floating_canvas);
-  ctx = floating_canvas.getContext("2d");
-  ctx.font = "50px Helvetica";
-  ctx.fillText(idea.idea, 0, 40);
-  */
-  var text_area = generateElement("textarea", {
-    "id" : "flooating_div_textarea_" + idea._id, "parent" : floating_div,
-    "background-color" : "yellow"
+  var style = {"height" : 0, "background-color" : "#c0ffee"};
+  var floating_div = generateElement("div", $.extend(style, {
+    "id" : idea._id, "position" : "absolute", "top" : top, "left" : left
+  }));
+  $("#" + floating_div.id).draggable({
+    delay : 100,
+    cancel : "text",
+    start : function(e, ui){window.noclick = true;}
   });
-  text_area.value = idea.idea;
-  autosize(text_area);
 
   floating_div.idea_id = idea._id;
 
+  floating_div.addEventListener("click", function(e){
+    if(window.noclick){window.noclick = false; return;}
+    transit(idea._id);
+    e.stopPropagation();
+  }, true);
   $("#" + floating_div.id).mousedown(function(e){
     switch(e.which){
-    case 1:
-      floating_div.addEventListener('click', function(){
-        transit(idea._id);
-      }, true); break;
     case 3:
-      delete_idea(idea, floating_div); break;
+      delete_idea(idea, floating_div);
+      window.noclick = true;
+      break;
     }
   });
 
+
+  var text_area = generateElement("textarea", {
+    "id" : "flooating_div_textarea_" + idea._id, "parent" : floating_div,
+    "background-color" : "yellow", "font-size" : idea.rating / 4 + 30
+  });
+  text_area.value = idea.idea;
+  autosize(text_area);
+  text_area.disabled = true;
+  if(idea.idea.length < 20){text_area.cols = idea.idea.length;}
+
+
   var rating_slider = generateElement("div", {
-    "position" : "absolute", "width" : style.width, "top" : text_area.hegiht
+    "position" : "relative", "width" : $("#"+text_area.id).width + 5, "top" : -20
   });
   rating_slider.id = "slider_" + floating_div.id;
   floating_div.appendChild(rating_slider);
+  rating_slider.addEventListener("click", function(e){
+    e.stopPropagation();
+  });
 
-  $("#" + rating_slider.id).slider();
+  $("#" + rating_slider.id).slider({start : function(e){window.noclick = true;}});
 
   $("#" + floating_div.id).mouseover(function(e){
     focus_on(floating_div);
@@ -52,7 +61,6 @@ function add_idea(idea){
     $("#" + rating_slider.id).show(500);
   }
   $("#"+floating_div.id).focusout(function(){
-    p('focus out');
     var value = $("#"+rating_slider.id).slider("value");
     $("#" + rating_slider.id).hide(500);
     socket.emit("score", {

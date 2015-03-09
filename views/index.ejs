@@ -12,7 +12,7 @@
     <link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 
     <style type = "text/css">
-      textarea{resize : none}
+      textarea{resize : none; text-align: center;}
       *{margin : 0; padding : 0;}
     </style>
   </head>
@@ -27,6 +27,7 @@
       PostingDiv.init($(window).width() / 2, $(window).height() / 2, "#c0ffee");
 
       function on_click(){
+        if(window.noclick){window.noclick = false; return;}
         switch(PostingDiv.state){
           case "active":
             PostingDiv.clear(500); break;
@@ -35,6 +36,7 @@
         }
       }
       $(document).bind("contextmenu", function(e){
+        if(window.noclick){window.noclick = false; return false;}
         transit(issue_tree[issue_tree.length - 2]);
         return false;
       });
