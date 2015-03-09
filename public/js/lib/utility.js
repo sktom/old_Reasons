@@ -3,6 +3,10 @@ function p(arg){
   alert(arg);
 }
 
+function clone(original){
+  return $.extend({}, original);
+}
+
 function stringize(obj){
   return $.map(Object.keys(obj), function(k, v){
     if(v == null){return "";}

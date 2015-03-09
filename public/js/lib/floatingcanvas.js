@@ -6,19 +6,27 @@ function add_idea(idea){
   if(FloatingDivList.include(idea.idea)){return;};
   //if($.inArray(idea.idea, idea_list) > -1){return;}
 
-  var style = {"width" : 150, "height" : 100, "background-color" : "#c0ffee"};
+  var style = {"width" : 150, "height" : 0, "background-color" : "#c0ffee"};
   var floating_div = generateElement("div", $.extend(style, {"id" : idea._id, "position" : "absolute", "top" : top, "left" : left}));
   $("#" + floating_div.id).draggable();
 
+  /*
   var floating_canvas = generateElement('canvas', {"parent" : floating_div, "style" : style, "id" : idea.idea.escape()});
   floating_div.appendChild(floating_canvas);
   ctx = floating_canvas.getContext("2d");
   ctx.font = "50px Helvetica";
   ctx.fillText(idea.idea, 0, 40);
+  */
+  var text_area = generateElement("textarea", {
+    "id" : "flooating_div_textarea_" + idea._id, "parent" : floating_div,
+    "background-color" : "yellow"
+  });
+  text_area.value = idea.idea;
+  autosize(text_area);
 
   floating_div.idea_id = idea._id;
 
-  $("#" + floating_canvas.id).mousedown(function(e){
+  $("#" + floating_div.id).mousedown(function(e){
     switch(e.which){
     case 1:
       floating_div.addEventListener('click', function(){
@@ -29,7 +37,9 @@ function add_idea(idea){
     }
   });
 
-  var rating_slider = generateElement("div", { "position" : "absolute", "width" : style.width, "top" : 100});
+  var rating_slider = generateElement("div", {
+    "position" : "absolute", "width" : style.width, "top" : text_area.hegiht
+  });
   rating_slider.id = "slider_" + floating_div.id;
   floating_div.appendChild(rating_slider);
 
@@ -42,7 +52,7 @@ function add_idea(idea){
     $("#" + rating_slider.id).show(500);
   }
   $("#"+floating_div.id).focusout(function(){
-    p('aou');
+    p('focus out');
     var value = $("#"+rating_slider.id).slider("value");
     $("#" + rating_slider.id).hide(500);
     socket.emit("score", {

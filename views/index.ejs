@@ -3,6 +3,7 @@
 <html style = "background-color:rgba(0,0,0,0.2)" onclick = "on_click()">
   <head>
     <script src = "js/lib/jquery-1.11.2.min.js"></script>
+    <script src = "js/lib/autosize.min.js"></script>
     <script src = "js/lib/utility.js"></script>
     <script src = "js/lib/sketchcanvas.js"></script>
     <script src = "js/lib/floatingcanvas.js"></script>
@@ -10,7 +11,10 @@
     <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 
-    <style type = "text/css">*{margin : 0; padding : 0;}</style>
+    <style type = "text/css">
+      textarea{resize : none}
+      *{margin : 0; padding : 0;}
+    </style>
   </head>
   <body>
     <script type = "text/javascript">

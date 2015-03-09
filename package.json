@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Reasons. Social Brainstorming Tool",
   "dependencies": {
+    "autosize": "^2.0.0",
     "ejs": "^2.3.1",
     "express": "^4.10.2",
     "extend": "^2.0.0",
