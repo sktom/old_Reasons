@@ -7,6 +7,8 @@ submit_idea = function(){
 }
 PostingDiv.init = function(x, y, c){
   document.body.appendChild(this);
+  //$("#"+PostingDiv.id).draggable();
+
   var style = function(){};
   style['canvas'] = {"top" : y - 150, "left" : x - 150, "width" : 280, "height" : 300};
   style['button'] = {"top" : y + 110, "left" : x - 130, "width" : 240, "height" : 30};
