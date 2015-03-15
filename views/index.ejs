@@ -32,7 +32,6 @@
       var socket = io();                                                        
       var focused_canvas;
 
-      //PostingDiv.init($(window).width() / 2, $(window).height() / 2, "#c0ffee");
       PostingDivList.init();
       PostingTypeDiv.init();
 
@@ -51,6 +50,10 @@
             break;
         }
       }
+
+var ESC_KEY_CODE = 27;
+$(window).keydown(function(e){if(e.which == ESC_KEY_CODE){PostingDivList.hide(500); PostingTypeDiv.hide(500)}});
+
 $(document).bind("contextmenu", function(e){
     if(window.noclick){window.noclick = false; return false;}
     transit(issue_tree[issue_tree.length - 2]);

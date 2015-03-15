@@ -22,6 +22,7 @@ PostingDivList.init = function(){
     });
     $(posting_div).css("z-index", FloatingDivList.get_max_zindex() + 2);
     posting_div["button"].addEventListener("click", function(){submit_idea(type)}, true);
+    $(posting_div).click(function(e){return false});
     var keyDownCode = 0;
     $("#posting_div_textarea").keydown(function(e){keyDownCode = e.which;});
     $("#posting_div_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
