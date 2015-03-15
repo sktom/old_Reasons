@@ -32,63 +32,73 @@
       var socket = io();                                                        
       var focused_canvas;
 
-      PostingDiv.init($(window).width() / 2, $(window).height() / 2, "#c0ffee");
+      //PostingDiv.init($(window).width() / 2, $(window).height() / 2, "#c0ffee");
+      PostingDivList.init();
+      PostingTypeDiv.init();
 
       function on_click(){
         if(window.noclick){window.noclick = false; return;}
-        switch(PostingDiv.state){
+        switch(PostingDivList.state){
           case "active":
-            PostingDiv.clear(500); break;
+            PostingDivList.hide(500); break;
           case "inactive":
-            PostingDiv.display(500); break;
+            switch(PostingTypeDiv.state){
+              case "active":
+                PostingTypeDiv.hide(500); break;
+              case "inactive":
+                PostingTypeDiv.show(500); break;
+            }
+            break;
         }
       }
-      $(document).bind("contextmenu", function(e){
-        if(window.noclick){window.noclick = false; return false;}
-        transit(issue_tree[issue_tree.length - 2]);
-        return false;
-      });
+$(document).bind("contextmenu", function(e){
+    if(window.noclick){window.noclick = false; return false;}
+    transit(issue_tree[issue_tree.length - 2]);
+    return false;
+    });
 
-      function transit(new_issue){
-        PostingDiv.clear(500);
-        if( ! new_issue){return;}
-        issue = new_issue;
-        issue_tree.push(issue);
-        while(issue_tree.indexOf(issue) + 1 < issue_tree.length){
-          issue_tree.pop();
-        }
-        FloatingDivList.clear();
-        //socket.emit("init_bord", issue);
-        refresh_bord();
-      }
-      socket.on('transit', function(new_issue){
-        transit(new_issue);
-      });
-      socket.on('add_idea', function(idea){
-        add_idea(idea);
-      });
-      socket.on('delete_floating_canvas', function(idea_id){
-        fc = FloatingDivList.find_by_id(idea_id);
-        if(fc){FloatingDivList.remove(fc);}
-      });
+function transit(new_issue){
+  $("#"+PostingDivList.id).hide(500);
+  if( ! new_issue){return;}
+  issue = new_issue;
+  issue_tree.push(issue);
+  while(issue_tree.indexOf(issue) + 1 < issue_tree.length){
+    issue_tree.pop();
+  }
+  FloatingDivList.hide();
+  //socket.emit("init_bord", issue);
+  refresh_bord();
+}
+socket.on('transit', function(new_issue){
+    transit(new_issue);
+    });
+socket.on('add_idea', function(idea){
+    add_idea(idea);
+    });
+socket.on('delete_floating_canvas', function(idea_id){
+    fc = FloatingDivList.find_by_id(idea_id);
+    if(fc){FloatingDivList.remove(fc);}
+    });
 
-      function focus_on(canvas){
-        focused_canvas = canvas;
-        focused_canvas.focus_on();
-      }
-      function focus_out(){
-        if( ! focused_canvas){return;}
-        focused_canvas.focus_out();
-        focused_canvas = null;
-      }
+socket.on("p", function(msg){p(msg)});
 
-      function refresh_bord(){
-        var current_id_list = FloatingDivList.get_id_list();
-        socket.emit("update", current_id_list, issue);
-      }
-      
-      setInterval("refresh_bord()", 10000);
-    </script>
+function focus_on(canvas){
+  focused_canvas = canvas;
+  focused_canvas.focus_on();
+}
+function focus_out(){
+  if( ! focused_canvas){return;}
+  focused_canvas.focus_out();
+  focused_canvas = null;
+}
+
+function refresh_bord(){
+  var current_id_list = FloatingDivList.get_id_list();
+  socket.emit("update", current_id_list, issue);
+}
+
+setInterval("refresh_bord()", 10000);
+</script>
   </body>
 </html>
 

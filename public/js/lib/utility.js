@@ -29,7 +29,7 @@ function generateElement(type, style){
   if( ! parent_element){return element;}
   parent_element.appendChild(element);
   if(style){$("#" + element.id).css(style);}
-  $("#" + element.id).bind('contextmenu', function(e){return false;}); 
+  $("#" + element.id).bind('contextmenu', function(e){return false;});
   return element;
 }
 

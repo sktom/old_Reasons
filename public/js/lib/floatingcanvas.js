@@ -3,10 +3,10 @@ function add_idea(idea){
   var left = idea.left || random() * screen.width;
   var top = idea.top || random() * screen.height;
 
-  if(FloatingDivList.include(idea.idea)){return;};
-  //if($.inArray(idea.idea, idea_list) > -1){return;}
+  if(FloatingDivList.include(idea.sentence)){return;};
+  //if($.inArray(idea.sentence, idea_list) > -1){return;}
 
-  var style = {"height" : 0, "background-color" : "#c0ffee"};
+  var style = {"height" : 0, "background-color" : color_list[idea.type]};
   var floating_div = generateElement("div", $.extend(style, {
     "id" : idea._id, "position" : "absolute", "top" : top, "left" : left
   }));
@@ -38,12 +38,12 @@ function add_idea(idea){
 
   var text_area = generateElement("textarea", {
     "id" : "flooating_div_textarea_" + idea._id, "parent" : floating_div,
-    "background-color" : "#c0ffee", "font-size" : idea.rating / 4 + 30
+    "background-color" : color_list[idea.type], "font-size" : idea.rating / 4 + 30
   });
-  text_area.value = idea.idea;
+  text_area.value = idea.sentence;
   autosize(text_area);
   text_area.disabled = true;
-  if(idea.idea.length + 5 < 20){text_area.cols = idea.idea.length + 5;}
+  if(idea.sentence.length + 5 < 20){text_area.cols = idea.sentence.length + 5;}
 
 
   var rating_slider = generateElement("div", {
@@ -94,7 +94,7 @@ FloatingDivList.include = function(idea){
     return floating_div.idea;
   }).include(idea);
 }
-FloatingDivList.clear = function(){
+FloatingDivList.hide = function(){
   while(this.entity.length){
     var element = this.entity.pop();
     document.body.removeChild(element);
@@ -113,6 +113,7 @@ FloatingDivList.get_id_list = function(){
   return this.entity.map(function(e){return e.idea_id});
 }
 FloatingDivList.get_max_zindex = function(){
-  return Math.max.apply(null, this.entity.map(function(e){return $(e).zIndex();}));
+  max_z = Math.max.apply(null, this.entity.map(function(e){return $(e).zIndex();}));
+  return(max_z < 0 ? 0 : max_z);
 }
 

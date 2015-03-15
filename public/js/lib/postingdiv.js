@@ -1,55 +1,123 @@
 
-var PostingDiv = generateElement("div", {"id" : "posting_div"});
+var PostingDivList = {};
 
-submit_idea = function(){
-  socket.emit("submit_idea", {"idea" : PostingDiv["textarea"].value, "issue" : issue});
-  PostingDiv.clear(500);
-}
-PostingDiv.init = function(x, y, c){
-  document.body.appendChild(this);
-  //$("#"+PostingDiv.id).draggable();
-
+var color_list = {"assent" : "#0000ff", "dissent" : "red", "propose" : "green", "question" : "yellow"};
+PostingDivList.init = function(){
+  var x = $(document).width() / 2;
+  var y = $(document).height() / 2;
   var style = function(){};
   style['canvas'] = {"top" : y - 150, "left" : x - 150, "width" : 280, "height" : 300};
   style['button'] = {"top" : y + 110, "left" : x - 130, "width" : 240, "height" : 30};
-  style['textarea'] = {"top" : y - 140, "left" : x - 140, "width" : 260, "height" : 240,
-    "font-size" : "40px"};
-  PostingDiv.elements = $.map(['canvas', 'button', 'textarea'], function(type){
-    var element = generateElement(type, $.extend(style[type], {
-      "background-color" : c, "position" :  "absolute",
-      "id" : "posting_div_" + type, "parent" : PostingDiv
-    }));
-    PostingDiv[type] = element;
-    return element;
-  });
-  PostingDiv["button"].addEventListener("click", submit_idea, true);
-  var keyDownCode = 0;
-  $("#posting_div_textarea").keydown(function(e){keyDownCode = e.which;});
-  $("#posting_div_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
-    submit_idea();
-  }});
+  style['textarea'] = {"top" : y - 140, "left" : x - 140, "width" : 260, "height" : 240, "font-size" : "40px"};
 
-  PostingDiv.clear(0);
-}
-
-PostingDiv.display = function(duration){
-  if(duration == null){duration = 500;}
-  $("#" + PostingDiv.id).show(duration);
-  //$.each(PostingDiv.elements, function(key, value){
-    //$('#' + value.id).show(duration);
-  //})
-  $("#posting_div_textarea").focus();
-  PostingDiv.state = "active";
-}
-PostingDiv.clear = function(duration){
-  if(duration == null){duration = 500;}
-  $("#" + PostingDiv.id).hide(duration);
-  /*
-  $.each(PostingDiv.elements, function(key, value){
-    $("#" + value.id).hide(duration);
+  $.each(["assent", "dissent", "propose", "question"], function(i, type){
+    var posting_div = generateElement("div", {"id" : "posting_div_" + type});
+    posting_div.elements = $.map(['canvas', 'button', 'textarea'], function(element_type){
+      var element = generateElement(element_type, $.extend(style[element_type], {
+        "background-color" : color_list[type], "position" :  "absolute",
+          "id" : "posting_div_" + type + "_" + element_type, "parent" : posting_div
+      }));
+      posting_div[element_type] = element;
+      return element;
+    });
+    $(posting_div).css("z-index", FloatingDivList.get_max_zindex() + 2);
+    posting_div["button"].addEventListener("click", function(){submit_idea(type)}, true);
+    var keyDownCode = 0;
+    $("#posting_div_textarea").keydown(function(e){keyDownCode = e.which;});
+    $("#posting_div_textarea").keyup(function(e){if(13 == e.which && e.which == keyDownCode && !e.altKey){
+      submit_idea(type);
+    }});
+    PostingDivList[type] = posting_div;
   })
-  */
-  PostingDiv.textarea.value = "";
-  PostingDiv.state = "inactive";
+
+  this.hide(0);
+}
+
+submit_idea = function(type){
+  socket.emit("submit_idea", {"idea" : PostingDivList[type]["textarea"].value, "issue" : issue, "type" : type});
+  PostingDivList.hide(500);
+}
+
+
+//var PostingDiv = generateElement("div", {"id" : "posting_div"});
+
+/*
+   PostingDiv.init = function(x, y, c){
+   document.body.appendChild(this.entity);
+//$("#"+PostingDiv.id).draggable();
+}
+*/
+
+PostingDivList.show = function(type, duration){
+  if(duration == null){duration = 500;}
+  $("#" + PostingDivList[type].id).show(duration);
+  $("#posting_div_" + type + "_textarea").focus();
+  PostingDivList.state = "active";
+}
+PostingDivList.hide = function(duration){
+  if(duration == null){duration = 500;}
+  $.each(["assent", "dissent", "propose", "question"], function(i, type){
+    $("#" + PostingDivList[type]["textarea"].id).val("");
+    $("#" + PostingDivList[type].id).hide(duration);
+  })
+  PostingDivList.state = "inactive";
+}
+
+
+var PostingTypeDiv = generateElement("div", {"id" : "posting_type_div"});
+
+PostingTypeDiv.select = function(type, canvas){
+  this.hide(500);
+  PostingDivList.show(type);
+}
+
+PostingTypeDiv.init = function(){
+  document.body.appendChild(this);
+  var style = function(){};
+  var x = $(document).width() / 2;
+  var y = $(document).height() / 2;
+  var size = 200;
+  style["assent"] = {"top" : y - size, "left" : x - size};
+  style["dissent"] = {"top" : y - size, "left" : x - 0};
+  style["propose"] = {"top" : y - 0, "left" : x - size};
+  style["question"] = {"top" : y - 0, "left" : x - 0};
+  $.each(["assent", "dissent", "propose", "question"], function(i, type){
+    var canvas = generateElement("canvas", $.extend(style[type], {
+      "position" : "absolute", "font-size" : "40px", "width" : size, "height" : size,
+        "id" : "posting_type_canvas_" + type, "parent" : PostingTypeDiv,
+        "background-color" : color_list[type]
+    }));
+    canvas["color"] = style[type]["background-color"];
+    PostingTypeDiv[type] = canvas;
+    canvas.addEventListener("click", function(e){
+      PostingTypeDiv.select(type, canvas);
+      e.stopPropagation();
+    });
+    canvas.addEventListener("click", function(){PostingTypeDiv.select(type, canvas)}, true);
+    var keyDownCode = 0;
+  });
+
+  this.hide(0);
+}
+
+PostingTypeDiv.show = function(duration){
+  if(duration == null){duration = 500;}
+
+  //$(PostingTypeDiv).css("z-index", FloatingDivList.get_max_zindex() + 2);
+  $.each(["assent", "dissent", "propose", "question"], function(i, type){
+    $("#posting_type_canvas_" + type).css("z-index", FloatingDivList.get_max_zindex() + 2);
+  });
+
+  $("#" + PostingTypeDiv.id).show(500);
+  $("#" + PostingTypeDiv.id).hide(0);
+  $("#" + PostingTypeDiv.id).show(0);
+  //window.scroll(1, 0); window.scroll(0, 0);
+
+  PostingTypeDiv.state = "active";
+}
+PostingTypeDiv.hide = function(duration){
+  if(duration == null){duration = 500;}
+  $("#" + PostingTypeDiv.id).hide(duration);
+  PostingTypeDiv.state = "inactive";
 }
 

@@ -19,7 +19,7 @@ db.once('open', function (callback) {
 });
 var Schema = mongoose.Schema;
 var Idea = mongoose.model("Idea", Schema({
-  "idea" : String, "idea_type" : Number,
+  "sentence" : String, "type" : String,
   "issue" : Schema.Types.ObjectId, "children" : Array, "rating" : Number
 }));
 Idea.ifExist = function(idea_id, cb_if_exist, cb_if_not){
@@ -68,19 +68,21 @@ app.get('/', function(req, res){
 
 function register_idea(msg){
   var idea = new Idea({
-    "idea" : msg.idea, "idea_type" : msg.type,
+    "sentence" : msg.idea, "type" : msg.type,
     "issue" : msg.issue, "children" : [], "rating" : 0});
   idea.save();
   return idea;
 }
 
 io.on('connection', function(socket){
+  function pm(msg){socket.emit("p", msg)}
+  p("MSG");
   Idea.findOne({"issue" : null}, function(err, root){
     var issue_idea;
     if( ! root){
       p("adding issue");
       root = register_idea({
-        "idea" : "Root Idea", "idea_type" : -1,
+        "sentence" : "Root Idea", "type" : "root",
         "children" : [], "issue" : null, "rating" : 0});
     }
     socket.emit("transit", root.id);
@@ -101,6 +103,8 @@ io.on('connection', function(socket){
       id_list_to_delete = existing_id_list.filter(function(e){return(brother_id_list.indexOf(e) < 0);});
       id_list_to_add.forEach(function(idea_id){
         Idea.with_specified_idea(idea_id, function(idea){
+          p("update");
+          p(idea);
           socket.emit("add_idea", idea);
         });
       });
@@ -117,6 +121,7 @@ io.on('connection', function(socket){
     });
   }
   socket.on('submit_idea', function(msg){
+    p("submit_idea");
     var idea = register_idea(msg);
     socket.emit('add_idea', idea);
     register_child(msg.issue, idea.id);
