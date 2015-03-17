@@ -1,7 +1,7 @@
 
 var PostingDivList = {};
 
-var color_list = {"assent" : "#0000ff", "dissent" : "red", "propose" : "green", "question" : "yellow"};
+var color_list = {"assent" : "#0000cc", "dissent" : "#cc0000", "propose" : "#00cc00", "question" : "#cccc00", "root" : "#000000"};
 PostingDivList.init = function(){
   var x = $(document).width() / 2;
   var y = $(document).height() / 2;
@@ -35,7 +35,7 @@ PostingDivList.init = function(){
 }
 
 submit_idea = function(type){
-  socket.emit("submit_idea", {"idea" : PostingDivList[type]["textarea"].value, "issue" : issue, "type" : type});
+  socket.emit("submit_idea", {"sentence" : PostingDivList[type]["textarea"].value, "issue" : issue._id, "type" : type});
   PostingDivList.hide(500);
 }
 

@@ -68,7 +68,7 @@ app.get('/', function(req, res){
 
 function register_idea(msg){
   var idea = new Idea({
-    "sentence" : msg.idea, "type" : msg.type,
+    "sentence" : msg.sentence, "type" : msg.type,
     "issue" : msg.issue, "children" : [], "rating" : 0});
   idea.save();
   return idea;
@@ -76,16 +76,17 @@ function register_idea(msg){
 
 io.on('connection', function(socket){
   function pm(msg){socket.emit("p", msg)}
-  p("MSG");
+
   Idea.findOne({"issue" : null}, function(err, root){
     var issue_idea;
     if( ! root){
       p("adding issue");
       root = register_idea({
-        "sentence" : "Root Idea", "type" : "root",
+        "sentence" : "Top", "type" : "root",
         "children" : [], "issue" : null, "rating" : 0});
     }
-    socket.emit("transit", root.id);
+    //socket.emit("transit", root.id);
+    socket.emit("transit", root);
   });
 
   /*
@@ -98,20 +99,19 @@ io.on('connection', function(socket){
   */
 
   socket.on("update", function(existing_id_list, issue){
-    Idea.with_children_id(issue, function(brother_id_list){
+    //Idea.with_children_id(issue, function(brother_id_list){
+    brother_id_list = issue.children;
+      brother_id_list.filter(function(e){true});
       id_list_to_add = brother_id_list.filter(function(e){return(existing_id_list.indexOf(e) < 0);});
       id_list_to_delete = existing_id_list.filter(function(e){return(brother_id_list.indexOf(e) < 0);});
       id_list_to_add.forEach(function(idea_id){
         Idea.with_specified_idea(idea_id, function(idea){
-          p("update");
-          p(idea);
           socket.emit("add_idea", idea);
         });
       });
       id_list_to_delete.forEach(function(idea_id){
         socket.emit("delete_floating_canvas", idea_id);
       });
-    });
   });
 
   function register_child(issue_id, child_id){
@@ -121,7 +121,7 @@ io.on('connection', function(socket){
     });
   }
   socket.on('submit_idea', function(msg){
-    p("submit_idea");
+    p("submit_ideaaaaaaa");
     var idea = register_idea(msg);
     socket.emit('add_idea', idea);
     register_child(msg.issue, idea.id);

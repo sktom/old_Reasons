@@ -1,7 +1,7 @@
 
 function add_idea(idea){
-  var left = idea.left || random() * screen.width;
-  var top = idea.top || random() * screen.height;
+  var left = idea.left || random() * screen.width / 0.85;
+  var top = idea.top || random() * screen.height / 0.9;
 
   if(FloatingDivList.include(idea.sentence)){return;};
   //if($.inArray(idea.sentence, idea_list) > -1){return;}
@@ -23,7 +23,8 @@ function add_idea(idea){
   floating_div.addEventListener("click", function(e){
     if(window.noclick){window.noclick = false; return;}
 
-    transit(idea._id);
+    //transit(idea._id);
+    transit(idea);
     e.stopPropagation();
   }, true);
   $("#" + floating_div.id).mousedown(function(e){

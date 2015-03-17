@@ -5,51 +5,81 @@
 -->
 <html onclick = "on_click()">
   <head>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
     <script src = "js/lib/jquery-1.11.2.min.js"></script>
     <script src = "js/lib/autosize.min.js"></script>
     <script src = "js/lib/utility.js"></script>
     <script src = "js/lib/postingdiv.js"></script>
     <script src = "js/lib/floatingcanvas.js"></script>
+    <script src = "js/lib/jquery.simplesidebar.min.js"></script>
     <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
     <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 
-    <style type = "text/css">
-      html{
-        background-image:url("asset/image/concretewall/Concrete-Wall-Large.jpg");
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-      }
-      textarea{resize : none; text-align: center;}
-      *{margin : 0; padding : 0;}
-    </style>
   </head>
   <body>
-    <script type = "text/javascript">
+<div class="wrapper">
 
-      var issue;
-      var issue_tree = [];
-      var socket = io();                                                        
-      var focused_canvas;
+<main>
+<div class="toolbar">
+<div id="open-sb" class="menu-button menu-left"></div>
+</div>
+</div>
+<section class="sidebar" style="position: fixed; top: 0px; left: 0px; bottom: 0px; max-width: 200px; z-index: 3000; width: 200px; margin-left: -200px;"><div data-sbplugin="sub-wrapper" style="width: 100%; height: 100%; overflow: auto;">
+<nav>
+<ul id = "side_ul"/>
+</nav>
+</div></section>
 
-      PostingDivList.init();
-      PostingTypeDiv.init();
+<script type = "text/javascript">
+  var li = generateElement("li", {"parent" : side_ul, "background":"blue"});
+  $(li).text("idea of ancestor");
 
-      function on_click(){
-        if(window.noclick){window.noclick = false; return;}
-        switch(PostingDivList.state){
-          case "active":
-            PostingDivList.hide(500); break;
-          case "inactive":
-            switch(PostingTypeDiv.state){
-              case "active":
-                PostingTypeDiv.hide(500); break;
-              case "inactive":
-                PostingTypeDiv.show(500); break;
-            }
-            break;
+  $( document ).ready(function() {
+    $.ajaxSetup({
+      cache: false
+    });
+
+    $(".sidebar").simpleSidebar({
+      settings: {
+        opener: "#open-sb",
+        wrapper: ".wrapper",
+        animation: {
+          duration: 500,
+          easing: "easeOutQuint"
         }
-      }
+      },
+      sidebar: {
+        align: "left",
+        width: 200,
+        closingLinks: "a",
+      },
+    });
+  });
+
+  var issue;
+  var issue_tree = [];
+  var socket = io();                                                        
+  var focused_canvas;
+
+  PostingDivList.init();
+  PostingTypeDiv.init();
+
+  function on_click(){
+    if(window.noclick){window.noclick = false; return;}
+    switch(PostingDivList.state){
+      case "active":
+        PostingDivList.hide(500); break;
+      case "inactive":
+        switch(PostingTypeDiv.state){
+          case "active":
+            PostingTypeDiv.hide(500); break;
+          case "inactive":
+            PostingTypeDiv.show(500); break;
+        }
+        break;
+    }
+  }
 
 var ESC_KEY_CODE = 27;
 $(window).keydown(function(e){if(e.which == ESC_KEY_CODE){PostingDivList.hide(500); PostingTypeDiv.hide(500)}});
@@ -60,6 +90,8 @@ $(document).bind("contextmenu", function(e){
     return false;
     });
 
+function set_sidebar(){
+}
 function transit(new_issue){
   $("#"+PostingDivList.id).hide(500);
   if( ! new_issue){return;}
@@ -69,19 +101,35 @@ function transit(new_issue){
     issue_tree.pop();
   }
   FloatingDivList.hide();
+  PostingDivList.hide();
+  PostingTypeDiv.hide();
+
+  $("#side_ul").empty();
+  issue_tree.forEach(function(issue){
+    var li = generateElement("li", {"id" : "li_" + issue._id, "parent" : side_ul, "background" : color_list[issue.type]});
+    var text;
+    if(issue.sentence.size > 12){
+      text = issue.sentence.slice(0, 11) + "...";
+    }else{
+      text = issue.sentence;
+    }
+    $(li).text(text);
+    $(li).click(function(e){transit(issue);});
+  });
+
   //socket.emit("init_bord", issue);
   refresh_bord();
 }
-socket.on('transit', function(new_issue){
-    transit(new_issue);
-    });
-socket.on('add_idea', function(idea){
-    add_idea(idea);
-    });
-socket.on('delete_floating_canvas', function(idea_id){
-    fc = FloatingDivList.find_by_id(idea_id);
-    if(fc){FloatingDivList.remove(fc);}
-    });
+socket.on("transit", function(new_issue){
+ transit(new_issue);
+});
+socket.on("add_idea", function(idea){
+  add_idea(idea);
+});
+socket.on("delete_floating_canvas", function(idea_id){
+  fc = FloatingDivList.find_by_id(idea_id);
+  if(fc){FloatingDivList.remove(fc);}
+});
 
 socket.on("p", function(msg){p(msg)});
 
