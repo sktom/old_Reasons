@@ -1,5 +1,7 @@
 //Simple Sidebar v1.1.0 by DcDeiv https://github.com/dcdeiv
 // GPLv2 http://www.gnu.org/licenses/gpl-2.0-standalone.html
+var maskDiv;
+
 (function( $ ) {
 	$.fn.simpleSidebar = function( options ) {
 		//declaring all global variables
@@ -113,7 +115,7 @@
 		//Appending to 'body' the mask-div and adding its style
 		$( 'body' ).append( '<div data-' + dataName + '="mask"></div>' );
 		
-		var maskDiv = $( 'body' ).children().filter(function(){
+		maskDiv = $( 'body' ).children().filter(function(){
 			return $( this ).data( dataName ) === 'mask' ;
 		});
 		
@@ -175,7 +177,7 @@
 			maskDiv.fadeIn();
 		});
 		
-		maskDiv.click(function() {
+		maskDiv.click(function(e) {
 			clicks++;
 			var nsbw = $sidebar.width();
 				countClicks = function( e ) {
@@ -223,6 +225,9 @@
 				
 				maskDiv.fadeIn();
 			}
+
+      $(left_div).animate({width : $(".sidebar").width()}, 500);
+      e.stopPropagation();
 		});
 		
 		$sidebar.on( 'click', $links, function() {
