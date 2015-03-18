@@ -71,6 +71,7 @@ function register_idea(msg){
     "sentence" : msg.sentence, "type" : msg.type,
     "issue" : msg.issue, "children" : [], "rating" : 0});
   idea.save();
+  pm(msg.sentence);
   return idea;
 }
 

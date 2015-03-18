@@ -11,19 +11,22 @@
     <script src = "js/lib/utility.js"></script>
     <script src = "js/lib/postingdiv.js"></script>
     <script src = "js/lib/floatingcanvas.js"></script>
-    <script src = "js/lib/jquery.simplesidebar.min.js"></script>
+    <script src = "js/lib/jquery.simplesidebar.js"></script>
     <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
     <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 
   </head>
   <body>
+    <img id = "background_image" src = "asset/image/concretewall/Concrete-Wall-Large.jpg" class = "background">
 <div class="wrapper">
 
 <main>
 <div class="toolbar">
+  <!--
 <div id="open-sb" class="menu-button menu-left"></div>
 </div>
+-->
 </div>
 <section class="sidebar" style="position: fixed; top: 0px; left: 0px; bottom: 0px; max-width: 200px; z-index: 3000; width: 200px; margin-left: -200px;"><div data-sbplugin="sub-wrapper" style="width: 100%; height: 100%; overflow: auto;">
 <nav>
@@ -32,8 +35,10 @@
 </div></section>
 
 <script type = "text/javascript">
-  var li = generateElement("li", {"parent" : side_ul, "background":"blue"});
-  $(li).text("idea of ancestor");
+  var left_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "left_div", "left" : 0, "top" : 0, "width" : $(".sidebar").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
+  var sidebar_open = false;
+  $(left_div).click(function(e){$(left_div).animate({width : 0}, 2000); sidebar_open = true; e.stopPropagation()});
+  $(".sidebar").click(function(e){e.stopPropagation()});
 
   $( document ).ready(function() {
     $.ajaxSetup({
@@ -42,12 +47,15 @@
 
     $(".sidebar").simpleSidebar({
       settings: {
-        opener: "#open-sb",
+        opener: "#left_div",
         wrapper: ".wrapper",
         animation: {
           duration: 500,
           easing: "easeOutQuint"
-        }
+        },
+        // onClose still doesn't work!! Actually simple sidebar is under development.
+        // So we may have to check the latest version by catches.
+        onClose: function(e){p(); $(left_div).animate({width : $(".sidebar").width()}, 500)}
       },
       sidebar: {
         align: "left",
@@ -65,7 +73,9 @@
   PostingDivList.init();
   PostingTypeDiv.init();
 
-  function on_click(){
+  $("#background_image").width($(window).width());
+  $("#background_image").height($(window).height());
+  $("#background_image").click(function(e){
     if(window.noclick){window.noclick = false; return;}
     switch(PostingDivList.state){
       case "active":
@@ -79,16 +89,17 @@
         }
         break;
     }
-  }
+  });
+
 
 var ESC_KEY_CODE = 27;
 $(window).keydown(function(e){if(e.which == ESC_KEY_CODE){PostingDivList.hide(500); PostingTypeDiv.hide(500)}});
 
 $(document).bind("contextmenu", function(e){
-    if(window.noclick){window.noclick = false; return false;}
-    transit(issue_tree[issue_tree.length - 2]);
-    return false;
-    });
+  if(window.noclick){window.noclick = false; return false;}
+  transit(issue_tree[issue_tree.length - 2]);
+  return false;
+});
 
 function set_sidebar(){
 }
@@ -114,7 +125,7 @@ function transit(new_issue){
       text = issue.sentence;
     }
     $(li).text(text);
-    $(li).click(function(e){transit(issue);});
+    $(li).click(function(e){transit(issue); maskDiv.trigger("click")});
   });
 
   //socket.emit("init_bord", issue);

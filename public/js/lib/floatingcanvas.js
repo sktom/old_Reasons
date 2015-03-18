@@ -1,7 +1,7 @@
 
 function add_idea(idea){
-  var left = idea.left || random() * screen.width / 0.85;
-  var top = idea.top || random() * screen.height / 0.9;
+  var left = idea.left || random() * $("#background_image").width() * 0.85;
+  var top = idea.top || random() * $("#background_image").height() * 0.9;
 
   if(FloatingDivList.include(idea.sentence)){return;};
   //if($.inArray(idea.sentence, idea_list) > -1){return;}

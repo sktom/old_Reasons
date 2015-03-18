@@ -226,7 +226,7 @@ var maskDiv;
 				maskDiv.fadeIn();
 			}
 
-      $(left_div).animate({width : $(".sidebar").width()}, 500);
+      $(left_div).animate({width : $(".sidebar").width()}, 200);
       e.stopPropagation();
 		});
 		
