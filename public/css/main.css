@@ -171,6 +171,11 @@ address,cite,i,em{
   margin-right: 1.5em;
 }
 
+.menu-right {
+  float: right;
+  margin-left: 1.5em;
+}
+
 .sidebar {
     margin: 0;
     padding-top: 1em;

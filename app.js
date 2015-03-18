@@ -71,7 +71,6 @@ function register_idea(msg){
     "sentence" : msg.sentence, "type" : msg.type,
     "issue" : msg.issue, "children" : [], "rating" : 0});
   idea.save();
-  pm(msg.sentence);
   return idea;
 }
 
@@ -100,8 +99,8 @@ io.on('connection', function(socket){
   */
 
   socket.on("update", function(existing_id_list, issue){
-    //Idea.with_children_id(issue, function(brother_id_list){
-    brother_id_list = issue.children;
+    Idea.with_children_id(issue._id, function(brother_id_list){
+    //brother_id_list = issue.children;
       brother_id_list.filter(function(e){true});
       id_list_to_add = brother_id_list.filter(function(e){return(existing_id_list.indexOf(e) < 0);});
       id_list_to_delete = existing_id_list.filter(function(e){return(brother_id_list.indexOf(e) < 0);});
@@ -113,7 +112,14 @@ io.on('connection', function(socket){
       id_list_to_delete.forEach(function(idea_id){
         socket.emit("delete_floating_canvas", idea_id);
       });
+      });
   });
+
+  function update_issue(issue_id){
+    Idea.with_specified_idea(issue_id, function(issue){
+      socket.emit('update_issue', issue);
+    });
+  }
 
   function register_child(issue_id, child_id){
     Idea.findOne({"_id" : issue_id}, function(err, issue_idea){
@@ -122,14 +128,13 @@ io.on('connection', function(socket){
     });
   }
   socket.on('submit_idea', function(msg){
-    p("submit_ideaaaaaaa");
     var idea = register_idea(msg);
-    socket.emit('add_idea', idea);
     register_child(msg.issue, idea.id);
+    update_issue(msg.issue);
+    socket.emit('add_idea', idea);
   });
 
   function delete_idea(idea_id){
-    p("delete_idea "+idea_id);
     Idea.findOne({"_id" : idea_id}, function(err, idea){
       idea.children.forEach(function(child_idea){
         delete_idea(child_idea);
