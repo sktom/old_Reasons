@@ -45,10 +45,14 @@ Idea.with_parent_idea = function(parent_id, cb){
   },{limit:1});
 }
 Idea.with_each_child = function(parent_id, cb){
+  var c = 0;
   Idea.find({"_id" : parent_id}, function(err, issue_idea_list){
-    issue_idea_list[0].children.forEach(function(child_id){
+    var children = issue_idea_list[0].children;
+    children.forEach(function(child_id){
       Idea.find({"_id" : child_id}, function(err, child_idea_list){
         cb(child_idea_list[0]);
+        c = c + 1;
+        if(c == children.length){cb(null)};
       },{limit:1});
     });
   },{limit:1});
@@ -97,6 +101,14 @@ io.on('connection', function(socket){
     });
   });
   */
+
+  socket.on("generate_branch_div", function(idea_id){
+    var children = [];
+    Idea.with_each_child(idea_id, function(child){
+      if(child == null){socket.emit("create_branch_div", idea_id, children)};
+      children.push(child);
+    });
+  });
 
   socket.on("update", function(existing_id_list, issue){
     Idea.with_children_id(issue._id, function(brother_id_list){

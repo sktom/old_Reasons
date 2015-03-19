@@ -1,15 +1,19 @@
 
-FloatingDiv = function(idea){
-  var left = idea.left || random() * $("#background_image").width() * 0.85;
-  var top = idea.top || random() * $("#background_image").height() * 0.9;
-  this.idea = idea;
+FloatingDiv = function(idea, x, y, issue){
+  var is_branch = ! (issue == undefined);
+  var parent_element = issue || document.body;
+  var left = x;
+  if(left == undefined){left = random() * $("#background_image").width() * 0.85};
+  var top = y;
+  if(top == undefined){top = random() * $("#background_image").height() * 0.9};
+  this.idea = idea; this.idea_id = idea._id;
 
   if(FloatingDivList.include(idea.sentence)){return;};
   //if($.inArray(idea.sentence, idea_list) > -1){return;}
 
   var style = {"height" : 0, "background-color" : color_list[idea.type]};
   var entity = generateElement("div", $.extend(style, {
-    "id" : idea._id, "position" : "absolute", "top" : top, "left" : left
+    "id" : idea._id, "position" : "absolute", "top" : top, "left" : left, "parent" : parent_element
   }));
   $("#" + entity.id).draggable({
     delay : 100,
@@ -19,10 +23,10 @@ FloatingDiv = function(idea){
       window.noclick = true;}
   });
 
-  this.idea_id = idea._id;
   this.entity = entity;
 
   var obj = this;
+  if(!is_branch){
   entity.addEventListener("click", function(e){
     if(window.noclick){window.noclick = false; return;}
 
@@ -38,11 +42,13 @@ FloatingDiv = function(idea){
       break;
     }
   });
+  }
 
   var text_area = generateElement("textarea", {
     "id" : "flooating_div_textarea_" + idea._id, "parent" : entity,
     "background-color" : color_list[idea.type], "font-size" : idea.rating / 4 + 30
   });
+  this.text_area = text_area;
   text_area.value = idea.sentence;
   autosize(text_area);
   text_area.disabled = true;
@@ -57,24 +63,36 @@ FloatingDiv = function(idea){
     e.stopPropagation();
   });
 
+  socket.emit("generate_branch_div", idea._id);
+
+  this.add_branch_div = function(branch_div){
+    this.branch_div = branch_div;
+  }
+
   $("#" + rating_slider.id).slider({start : function(e){window.noclick = true;}});
 
-  /*
+  if( ! is_branch){
   $("#" + entity.id).mouseover(function(e){
-    focus_on(entity);
+    //focus_on(entity);
+    obj.branch_div.show(500);
   });
+  /*
   floating_div.focus_on = function(){
     $("#" + rating_slider.id).show(500);
   }
   */
-  $("#"+entity.id).focusout(function(){
+  //$("#"+entity.id).focusout(function(){
+  $("#background_image").mouseover(function(){
     var value = $("#"+rating_slider.id).slider("value");
     //$("#" + rating_slider.id).hide(500);
+    obj.branch_div.hide(500);
     socket.emit("score", {
       "idea_id" : idea._id, "rating" : value
     });
   });
+  }
 }
+
 
 function add_idea(idea){
   FloatingDivList.push(new FloatingDiv(idea));

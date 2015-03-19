@@ -9,6 +9,7 @@
       <script src = "js/lib/jquery-1.11.2.min.js"></script>
       <script src = "js/lib/autosize.min.js"></script>
       <script src = "js/lib/utility.js"></script>
+      <script src = "js/lib/branchdiv.js"></script>
       <script src = "js/lib/postingdiv.js"></script>
       <script src = "js/lib/floatingcanvas.js"></script>
       <script src = "js/lib/jquery.simplesidebar.js"></script>
@@ -143,6 +144,13 @@ socket.on("delete_floating_canvas", function(idea_id){
     fc = FloatingDivList.find_by_id(idea_id);
     if(fc){FloatingDivList.remove(fc);}
     });
+
+socket.on("create_branch_div", function(idea_id, children){
+  var floating_div = FloatingDivList.find_by_id(idea_id);
+  var branch_div = new BranchDiv(floating_div, children);
+  floating_div.add_branch_div(branch_div);
+  $(branch_div.entity).hide(0);
+});
 
 socket.on("update_issue", function(updated_issue){issue = updated_issue; issue_tree.pop(); issue_tree.push(issue);});
 
