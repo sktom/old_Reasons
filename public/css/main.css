@@ -207,19 +207,17 @@ address,cite,i,em{
     
 }
 
+canvas.background{
+  z-index : 0;
+  position : absolute
+}
 img.background{
   z-index : -1;
   position : absolute
   width : 100%;
   height : 100%;
 }
-html{
-  /*
-  background-image:url("../asset/image/concretewall/Concrete-Wall-Large.jpg");
-  */
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
+
 textarea{resize : none; text-align: center;}
 *{margin : 0; padding : 0;}
 

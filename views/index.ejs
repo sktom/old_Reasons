@@ -9,16 +9,17 @@
       <script src = "js/lib/jquery-1.11.2.min.js"></script>
       <script src = "js/lib/autosize.min.js"></script>
       <script src = "js/lib/utility.js"></script>
+      <script src = "js/lib/leaf.js"></script>
       <script src = "js/lib/branchdiv.js"></script>
       <script src = "js/lib/postingdiv.js"></script>
       <script src = "js/lib/floatingcanvas.js"></script>
-      <script src = "js/lib/jquery.simplesidebar.js"></script>
       <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+      <script src = "js/lib/jquery.simplesidebar.js"></script>
       <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
       <link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
     </head>
     <body>
-      <img id = "background_image" src = "asset/image/concretewall/Concrete-Wall-Large.jpg" class = "background">
+      <canvas id = "background_canvas" class = "background" background-color = "#ffffff"></canvas>
       <div class="wrapper">
 
         <main>
@@ -38,47 +39,56 @@
           //function on_click(){requestFullScreen(document.body);}
           //$(document.body).trigger("click");
 
-          var left_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "left_div", "left" : 0, "top" : 0, "width" : $(".sidebar").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
-          var sidebar_open = false;
-          $(left_div).click(function(e){$(left_div).animate({width : 0}, 2000); sidebar_open = true; e.stopPropagation()});
-          $(".sidebar").click(function(e){e.stopPropagation()});
+        var left_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "left_div", "left" : 0, "top" : 0, "width" : $(".sidebar").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
+        var sidebar_open = false;
+        $(left_div).click(function(e){$(left_div).animate({width : 0}, 2000); sidebar_open = true; e.stopPropagation()});
+        $(".sidebar").click(function(e){e.stopPropagation()});
 
-          $( document ).ready(function() {
-              $.ajaxSetup({
-cache: false
-});
+        $( document ).ready(function() {
+          $.ajaxSetup({
+            cache: false
+          });
 
-              $(".sidebar").simpleSidebar({
-settings: {
-opener: "#left_div",
-wrapper: ".wrapper",
-animation: {
-duration: 600,
-easing: "easeOutQuint"
-},
-// onClose still doesn't work!! Actually simple sidebar is under development.
-// So we may have to check the latest version by catches.
-onClose: function(e){p(); $(left_div).animate({width : $(".sidebar").width()}, 500)}
-},
-sidebar: {
-align: "left",
-width: 200,
-closingLinks: "a",
-},
-});
-});
+          $(".sidebar").simpleSidebar({
+            settings: {
+              opener: "#left_div",
+              wrapper: ".wrapper",
+              animation: {
+                duration: 600,
+                easing: "easeOutQuint"
+              },
+              // onClose still doesn't work!! Actually simple sidebar is under development.
+              // So we may have to check the latest version by catches.
+              onClose: function(e){p(); $(left_div).animate({width : $(".sidebar").width()}, 500)}
+            },
+            sidebar: {
+            align: "left",
+            width: 200,
+            closingLinks: "a",
+          },
+        });
+      });
 
-var issue;
-var issue_tree = [];
-var socket = io();                                                        
-var focused_canvas;
+      var issue;
+      var issue_tree = [];
+      var socket = io();                                                        
+      var focused_canvas;
 
-PostingDivList.init();
-PostingTypeDiv.init();
+      PostingDivList.init();
+      PostingTypeDiv.init();
 
-$("#background_image").width($(window).width());
-$("#background_image").height($(window).height());
-$("#background_image").click(function(e){
+      var img = new Image();
+      $("#background_canvas").width($(window).width());
+      $("#background_canvas").height($(window).height());
+      $("#background_canvas").zIndex(0);
+      img.src = "../asset/image/concretewall/ConcreteWall.png";
+      img.onload = function(){
+        var context = background_canvas.getContext('2d');
+        context.fillStyle = context.createPattern(img, 'repeat');
+        context.fillRect(0, 0, background_canvas.width, background_canvas.height);
+      }
+
+$("#background_canvas").click(function(e){
     if(window.noclick){window.noclick = false; return;}
     switch(PostingDivList.state){
     case "active":
@@ -146,11 +156,11 @@ socket.on("delete_floating_canvas", function(idea_id){
     });
 
 socket.on("create_branch_div", function(idea_id, children){
-  var floating_div = FloatingDivList.find_by_id(idea_id);
-  var branch_div = new BranchDiv(floating_div, children);
-  floating_div.add_branch_div(branch_div);
-  $(branch_div.entity).hide(0);
-});
+    var floating_div = FloatingDivList.find_by_id(idea_id);
+    var branch_div = new BranchDiv(floating_div, children);
+    floating_div.add_branch_div(branch_div);
+    $(branch_div.entity).hide(0);
+    });
 
 socket.on("update_issue", function(updated_issue){issue = updated_issue; issue_tree.pop(); issue_tree.push(issue);});
 
