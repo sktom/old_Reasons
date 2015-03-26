@@ -11,13 +11,13 @@ BranchDiv = function(floating_div, children){
   var issue = floating_div.idea;
   var x = 50;
   var y = 0;
-  var w = $(floating_div.text_area).width();
+  var w = floating_div.width();
   children.forEach(function(idea){
     var leaf = new Leaf(idea, x, y, div);
     y = y + leaf.height() + 30;
     w = Math.max(w, leaf.width());
   });
-  $(background).height(y+100);// + $(floating_div).height());
+  $(background).height(y + floating_div.height());
   $(background).width(w + x * 2);// + $(floating_div).height());
 
 

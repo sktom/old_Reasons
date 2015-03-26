@@ -40,7 +40,7 @@ Leaf = function(idea, left, top, issue){
   });
 
   var text_area = generateElement("textarea", {
-    "id" : "flooating_div_textarea_" + idea._id, "parent" : div,
+    "id" : "floating_div_textarea_" + idea._id, "parent" : div,
     "background-color" : color_list[idea.type], "font-size" : idea.rating / 4 + 30
   });
   this.text_area = text_area;

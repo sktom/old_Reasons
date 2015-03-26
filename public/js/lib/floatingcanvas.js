@@ -8,6 +8,8 @@ FloatingDiv = function(idea, x, y, issue){
   this.leaf = leaf;
   this.div = leaf.div;
 
+  this.width = function(){return leaf.width()}
+  this.height = function(){return leaf.height()}
 
   socket.emit("generate_branch_div", idea._id);
 
