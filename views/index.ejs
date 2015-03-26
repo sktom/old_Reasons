@@ -6,6 +6,7 @@
   <html>
     <head>
       <link rel="stylesheet" type="text/css" href="css/main.css">
+      <link rel="stylesheet" href="css/jquery.sidr.dark.css">
       <script src = "js/lib/jquery-1.11.2.min.js"></script>
       <script src = "js/lib/autosize.min.js"></script>
       <script src = "js/lib/utility.js"></script>
@@ -14,81 +15,103 @@
       <script src = "js/lib/postingdiv.js"></script>
       <script src = "js/lib/floatingcanvas.js"></script>
       <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
-      <script src = "js/lib/jquery.simplesidebar.js"></script>
+      <script src = "js/lib/jquery.sidr.min.js"></script>
       <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
       <link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
     </head>
     <body>
-      <canvas id = "background_canvas" class = "background" background-color = "#ffffff"></canvas>
-      <div class="wrapper">
+      <canvas id = "background_canvas" class = "background"></canvas>
 
-        <main>
-        <div class="toolbar">
-          <!--
-          <div id="open-sb" class="menu-button menu-left"></div>
-        </div>
-        -->
+      <div id="sidr-left">
+        <ul id = "left_sidr_ul">
+          <li><a href="#">List 1</a></li>
+          <li class="active"><a href="#">List 2</a></li>
+          <li><a href="#">List 3</a></li>
+        </ul>
       </div>
-      <section class="sidebar" style="position: fixed; top: 0px; left: 0px; bottom: 0px; max-width: 200px; z-index: 3000; width: 200px; margin-left: -200px;"><div data-sbplugin="sub-wrapper" style="width: 100%; height: 100%; overflow: auto;">
-        <nav>
-        <ul id = "side_ul"/>
-          </nav>
-        </div></section>
 
-        <script type = "text/javascript">
-          //function on_click(){requestFullScreen(document.body);}
-          //$(document.body).trigger("click");
+      <div id="sidr-right">
+        <ul id = "right_sidr_ul">
+          <li><a href="#">List 1</a></li>
+          <li><a href="#">List 2</a></li>
+          <li><a href="#">List 3</a></li>
+        </ul>
+      </div>
+      <canvas id = "left_div" left = 0 top = 0 width = 50 class = "guide"></canvas>
+      <canvas id = "right_div" top = 0 width = 50 class = "guide"></canvas>
 
-        var left_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "left_div", "left" : 0, "top" : 0, "width" : $(".sidebar").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
-        var sidebar_open = false;
-        $(left_div).click(function(e){$(left_div).animate({width : 0}, 2000); sidebar_open = true; e.stopPropagation()});
-        $(".sidebar").click(function(e){e.stopPropagation()});
+      <script type = "text/javascript">
+        //function on_click(){requestFullScreen(document.body);}
+        //$(document.body).trigger("click");
 
-        $( document ).ready(function() {
-          $.ajaxSetup({
-            cache: false
+      $(document).ready(function() {
+        $('#left_div').sidr({
+          name: 'sidr-left',
+          side: 'left' // By default
           });
-
-          $(".sidebar").simpleSidebar({
-            settings: {
-              opener: "#left_div",
-              wrapper: ".wrapper",
-              animation: {
-                duration: 600,
-                easing: "easeOutQuint"
-              },
-              // onClose still doesn't work!! Actually simple sidebar is under development.
-              // So we may have to check the latest version by catches.
-              onClose: function(e){p(); $(left_div).animate({width : $(".sidebar").width()}, 500)}
-            },
-            sidebar: {
-            align: "left",
-            width: 200,
-            closingLinks: "a",
-          },
+        $('#right_div').sidr({
+          name: 'sidr-right',
+          side: 'right'
+          });
         });
-      });
+/*
+   var left_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "left_div", "left" : 0, "top" : 0, "width" : $("#left-menu").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
+   var right_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "right_div", "right" : 0, "top" : 0, "width" : $("#right-menu").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
+ */
 
-      var issue;
-      var issue_tree = [];
-      var socket = io();                                                        
-      var focused_canvas;
+/*
+   var left_menu = generateElement("div", {"id" : "left_menu", "parent" : null});
+   var left_sidr_ul = generateElement("ul", {"id" : "left_sidr_ul"});
+   var right_menu = generateElement("div", {"id" : "right_menu", "parent" : null});
+   var right_sidr_ul = generateElement("ul", {"id" : "right_sidr_ul"});
 
-      PostingDivList.init();
-      PostingTypeDiv.init();
+   $(document).ready(function(){
+   $('#left_div').sidr({
+name: 'sidr_left',
+side: 'left',
+source:'<div id="left_menu"> <ul id = "left_sidr_ul"></ul> </div>'
+});
+left_menu.parent = "sidr_left";
+$('#right_div').sidr({
+name: 'sidr_right',
+side: 'right',
+source:' <div id="right_menu"> <ul id = "right_sidr_ul"><li>stnh</li><li>sssss</li></ul> </div>'
+});
+});
+ */
 
-      var img = new Image();
-      $("#background_canvas").width($(window).width());
-      $("#background_canvas").height($(window).height());
-      $("#background_canvas").zIndex(0);
-      img.src = "../asset/image/concretewall/ConcreteWall.png";
-      img.onload = function(){
-        var context = background_canvas.getContext('2d');
-        context.fillStyle = context.createPattern(img, 'repeat');
-        context.fillRect(0, 0, background_canvas.width, background_canvas.height);
-      }
+$("#right_div").css({"position" : "absolute", "left" : $(document).width() - $("#right_div").width()});
+$("#right_div").attr({"href" : "#right_menu"});
+$("#left_div").attr({"href" : "#left_menu"});
+$("#left_div").css({"position" : "absolute"});
+height = $(document).height();
+right_div.height = height;
+left_div.height = height;
+
+
+var issue;
+var issue_tree = [];
+var socket = io();                                                        
+var focused_canvas;
+
+PostingDivList.init();
+PostingTypeDiv.init();
+
+var img = new Image();
+$("#background_canvas").width($(window).width());
+$("#background_canvas").height($(window).height());
+$("#background_canvas").zIndex(0);
+/*
+   img.onload = function(){
+   var context = background_canvas.getContext('2d');
+   context.fillStyle = context.createPattern(img, 'repeat');
+   context.fillRect(0, 0, background_canvas.width, background_canvas.height);
+   }
+ */
 
 $("#background_canvas").click(function(e){
+    $.sidr("close", "sidr-right"); $.sidr("close", "sidr-left");
+
     if(window.noclick){window.noclick = false; return;}
     switch(PostingDivList.state){
     case "active":
@@ -115,6 +138,18 @@ $(document).bind("contextmenu", function(e){
     });
 
 function set_sidebar(){
+  $("#left_sidr_ul").empty();
+  issue_tree.forEach(function(issue){
+      var li = generateElement("li", {"id" : "li_" + issue._id, "parent" : left_sidr_ul, "background" : color_list[issue.type]});
+      var text;
+      if(issue.sentence.size > 12){
+      text = issue.sentence.slice(0, 11) + "...";
+      }else{
+      text = issue.sentence;
+      }
+      $(li).text(text);
+      $(li).click(function(e){transit(issue); maskDiv.trigger("click")});
+      });
 }
 function transit(new_issue){
   $("#"+PostingDivList.id).hide(500);
@@ -128,18 +163,7 @@ function transit(new_issue){
   PostingDivList.hide();
   PostingTypeDiv.hide();
 
-  $("#side_ul").empty();
-  issue_tree.forEach(function(issue){
-      var li = generateElement("li", {"id" : "li_" + issue._id, "parent" : side_ul, "background" : color_list[issue.type]});
-      var text;
-      if(issue.sentence.size > 12){
-      text = issue.sentence.slice(0, 11) + "...";
-      }else{
-      text = issue.sentence;
-      }
-      $(li).text(text);
-      $(li).click(function(e){transit(issue); maskDiv.trigger("click")});
-      });
+  set_sidebar();
 
   //socket.emit("init_bord", issue);
   refresh_bord();
