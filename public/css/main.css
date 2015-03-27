@@ -211,16 +211,26 @@ address,cite,i,em{
 
 .guide{
   z-index : 300;
-  background-color : rgba(0, 0, 0, 0.5);
+  background-color : rgba(0, 0, 0, 0.05);
 }
 canvas.background{
   z-index : -1;
   position : absolute;
+  /*
   background-image:url("../asset/image/quadrille_p.png");
   background-repeat: repeat;
   background-attachment: fixed;
+  */
+  background-color : rgba(213, 255, 245, 0.8);
   opacity : 0.5;
+}
+div.menu{
+  text-align : center;
 }
 *{margin : 0; padding : 0;}
 textarea{resize : none; text-align: center;}
+textarea.leaf{
+  position: absolute;
+  vertical-align:middle;
+}
 

@@ -5,8 +5,9 @@
 -->
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="css/main.css">
-<link rel="stylesheet" href="css/jquery.sidr.dark.css">
+<link rel = "stylesheet" href="css/main.css">
+<link rel = "stylesheet" href="css/jquery.sidr.dark.css">
+<link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css">
 <script src = "js/lib/jquery-1.11.2.min.js"></script>
 <script src = "js/lib/autosize.min.js"></script>
 <script src = "js/lib/utility.js"></script>
@@ -17,28 +18,28 @@
 <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
 <script src = "js/lib/jquery.sidr.min.js"></script>
 <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
-<link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 </head>
 <body>
   <canvas id = "background_canvas" class = "background"></canvas>
 
-<div id="sidr-left">
+<div id="sidr-left" class = "menu">
   <ul id = "left_sidr_ul">
-    <li><a href="#">List 1</a></li>
-    <li class="active"><a href="#">List 2</a></li>
-    <li><a href="#">List 3</a></li>
   </ul>
 </div>
 
-<div id="sidr-right">
-  <ul id = "right_sidr_ul">
-    <li><a href="#">List 1</a></li>
-    <li><a href="#">List 2</a></li>
-    <li><a href="#">List 3</a></li>
+<div id="sidr-right" class = "menu">
+  <ul id = "right_top_sidr_ul" top = 0>
+    <li>Login</li>
+  </ul>
+  <ul id = "right_bottom_sidr_ul">
+    <li>CONTACT US</li>
   </ul>
 </div>
 <canvas id = "left_div" left = 0 top = 0 width = 50 class = "guide"></canvas>
 <canvas id = "right_div" top = 0 width = 50 class = "guide"></canvas>
+<!--
+<div id="right_div" class="menu-button menu-right"></div>
+-->
 
 <script type = "text/javascript">
   //function on_click(){requestFullScreen(document.body);}
@@ -54,6 +55,8 @@
       side: 'right'
     });
   });
+
+
   /*
   var left_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "left_div", "left" : 0, "top" : 0, "width" : $("#left-menu").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
   var right_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "right_div", "right" : 0, "top" : 0, "width" : $("#right-menu").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});

@@ -42,7 +42,7 @@ Leaf = function(idea, left, top, issue){
   var text_area = generateElement("textarea", {
     "id" : "floating_div_textarea_" + idea._id, "parent" : div,
     "background-color" : color_list[idea.type], "font-size" : idea.rating / 4 + 30,
-    "margin" : "0.3em"
+    "margin" : "0.3em", "class" : "leaf"
   });
   this.text_area = text_area;
   text_area.value = idea.sentence;

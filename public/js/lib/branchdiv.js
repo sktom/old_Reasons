@@ -17,7 +17,7 @@ BranchDiv = function(floating_div, children){
     y = y + leaf.height() * 1.4;
     w = Math.max(w, leaf.width());
   });
-  $(background).height(y + floating_div.height() * 1.8);
+  $(background).height(y + floating_div.height() * 1.4);
   $(background).width(w + x * 2);// + $(floating_div).height());
 
 

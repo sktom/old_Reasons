@@ -1,7 +1,7 @@
 
 var PostingDivList = {};
 
-var color_list = {"assent" : "#00b2ca", "dissent" : "#f79256", "propose" : "#78c7b0", "question" : "#ead98b", "root" : "#000000"};
+var color_list = {"assent" : "#20b2ca", "dissent" : "#f79256", "propose" : "#78d7b0", "question" : "#ead98b", "root" : "#000000"};
 PostingDivList.init = function(){
   var x = $(document).width() / 2;
   var y = $(document).height() / 2;
