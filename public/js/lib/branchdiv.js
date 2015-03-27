@@ -10,14 +10,14 @@ BranchDiv = function(floating_div, children){
   this.div = div;
   var issue = floating_div.idea;
   var x = 50;
-  var y = 0;
+  var y = -10;
   var w = floating_div.width();
   children.forEach(function(idea){
     var leaf = new Leaf(idea, x, y, div);
-    y = y + leaf.height() + 30;
+    y = y + leaf.height() * 1.4;
     w = Math.max(w, leaf.width());
   });
-  $(background).height(y + floating_div.height());
+  $(background).height(y + floating_div.height() * 1.8);
   $(background).width(w + x * 2);// + $(floating_div).height());
 
 

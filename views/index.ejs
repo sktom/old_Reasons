@@ -2,211 +2,211 @@
 <!DOCTYPE html>
 <!--
 <html style = "background-color:rgba(0,0,0,0.2)" onclick = "on_click()">
-  -->
-  <html>
-    <head>
-      <link rel="stylesheet" type="text/css" href="css/main.css">
-      <link rel="stylesheet" href="css/jquery.sidr.dark.css">
-      <script src = "js/lib/jquery-1.11.2.min.js"></script>
-      <script src = "js/lib/autosize.min.js"></script>
-      <script src = "js/lib/utility.js"></script>
-      <script src = "js/lib/leaf.js"></script>
-      <script src = "js/lib/branchdiv.js"></script>
-      <script src = "js/lib/postingdiv.js"></script>
-      <script src = "js/lib/floatingcanvas.js"></script>
-      <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
-      <script src = "js/lib/jquery.sidr.min.js"></script>
-      <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
-      <link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
-    </head>
-    <body>
-      <canvas id = "background_canvas" class = "background"></canvas>
+-->
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/main.css">
+<link rel="stylesheet" href="css/jquery.sidr.dark.css">
+<script src = "js/lib/jquery-1.11.2.min.js"></script>
+<script src = "js/lib/autosize.min.js"></script>
+<script src = "js/lib/utility.js"></script>
+<script src = "js/lib/leaf.js"></script>
+<script src = "js/lib/branchdiv.js"></script>
+<script src = "js/lib/postingdiv.js"></script>
+<script src = "js/lib/floatingcanvas.js"></script>
+<script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+<script src = "js/lib/jquery.sidr.min.js"></script>
+<script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
+<link rel = "stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+</head>
+<body>
+  <canvas id = "background_canvas" class = "background"></canvas>
 
-      <div id="sidr-left">
-        <ul id = "left_sidr_ul">
-          <li><a href="#">List 1</a></li>
-          <li class="active"><a href="#">List 2</a></li>
-          <li><a href="#">List 3</a></li>
-        </ul>
-      </div>
+<div id="sidr-left">
+  <ul id = "left_sidr_ul">
+    <li><a href="#">List 1</a></li>
+    <li class="active"><a href="#">List 2</a></li>
+    <li><a href="#">List 3</a></li>
+  </ul>
+</div>
 
-      <div id="sidr-right">
-        <ul id = "right_sidr_ul">
-          <li><a href="#">List 1</a></li>
-          <li><a href="#">List 2</a></li>
-          <li><a href="#">List 3</a></li>
-        </ul>
-      </div>
-      <canvas id = "left_div" left = 0 top = 0 width = 50 class = "guide"></canvas>
-      <canvas id = "right_div" top = 0 width = 50 class = "guide"></canvas>
+<div id="sidr-right">
+  <ul id = "right_sidr_ul">
+    <li><a href="#">List 1</a></li>
+    <li><a href="#">List 2</a></li>
+    <li><a href="#">List 3</a></li>
+  </ul>
+</div>
+<canvas id = "left_div" left = 0 top = 0 width = 50 class = "guide"></canvas>
+<canvas id = "right_div" top = 0 width = 50 class = "guide"></canvas>
 
-      <script type = "text/javascript">
-        //function on_click(){requestFullScreen(document.body);}
-        //$(document.body).trigger("click");
+<script type = "text/javascript">
+  //function on_click(){requestFullScreen(document.body);}
+  //$(document.body).trigger("click");
 
-      $(document).ready(function() {
-        $('#left_div').sidr({
-          name: 'sidr-left',
-          side: 'left' // By default
-          });
-        $('#right_div').sidr({
-          name: 'sidr-right',
-          side: 'right'
-          });
-        });
-/*
-   var left_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "left_div", "left" : 0, "top" : 0, "width" : $("#left-menu").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
-   var right_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "right_div", "right" : 0, "top" : 0, "width" : $("#right-menu").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
- */
+  $(document).ready(function() {
+    $('#left_div').sidr({
+      name: 'sidr-left',
+      side: 'left' // By default
+    });
+    $('#right_div').sidr({
+      name: 'sidr-right',
+      side: 'right'
+    });
+  });
+  /*
+  var left_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "left_div", "left" : 0, "top" : 0, "width" : $("#left-menu").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
+  var right_div = generateElement("canvas", {"parent" : document.body, "position" : "absolute", "id" : "right_div", "right" : 0, "top" : 0, "width" : $("#right-menu").width(), "height" : $(document).height(), "background-color" : "rgba(0, 0, 0, 0.05)"});
+  */
 
-/*
-   var left_menu = generateElement("div", {"id" : "left_menu", "parent" : null});
-   var left_sidr_ul = generateElement("ul", {"id" : "left_sidr_ul"});
-   var right_menu = generateElement("div", {"id" : "right_menu", "parent" : null});
-   var right_sidr_ul = generateElement("ul", {"id" : "right_sidr_ul"});
+  /*
+  var left_menu = generateElement("div", {"id" : "left_menu", "parent" : null});
+  var left_sidr_ul = generateElement("ul", {"id" : "left_sidr_ul"});
+  var right_menu = generateElement("div", {"id" : "right_menu", "parent" : null});
+  var right_sidr_ul = generateElement("ul", {"id" : "right_sidr_ul"});
 
-   $(document).ready(function(){
-   $('#left_div').sidr({
-name: 'sidr_left',
-side: 'left',
-source:'<div id="left_menu"> <ul id = "left_sidr_ul"></ul> </div>'
-});
-left_menu.parent = "sidr_left";
-$('#right_div').sidr({
-name: 'sidr_right',
-side: 'right',
-source:' <div id="right_menu"> <ul id = "right_sidr_ul"><li>stnh</li><li>sssss</li></ul> </div>'
-});
-});
- */
+  $(document).ready(function(){
+  $('#left_div').sidr({
+  name: 'sidr_left',
+  side: 'left',
+  source:'<div id="left_menu"> <ul id = "left_sidr_ul"></ul> </div>'
+  });
+  left_menu.parent = "sidr_left";
+  $('#right_div').sidr({
+  name: 'sidr_right',
+  side: 'right',
+  source:' <div id="right_menu"> <ul id = "right_sidr_ul"><li>stnh</li><li>sssss</li></ul> </div>'
+  });
+  });
+  */
 
-$("#right_div").css({"position" : "absolute", "left" : $(document).width() - $("#right_div").width()});
-$("#right_div").attr({"href" : "#right_menu"});
-$("#left_div").attr({"href" : "#left_menu"});
-$("#left_div").css({"position" : "absolute"});
-height = $(document).height();
-right_div.height = height;
-left_div.height = height;
+    $("#right_div").css({"position" : "absolute", "left" : $(document).width() - $("#right_div").width()});
+    $("#right_div").attr({"href" : "#right_menu"});
+    $("#left_div").attr({"href" : "#left_menu"});
+    $("#left_div").css({"position" : "absolute"});
+    height = $(document).height();
+    right_div.height = height;
+    left_div.height = height;
 
 
-var issue;
-var issue_tree = [];
-var socket = io();                                                        
-var focused_canvas;
+    var issue;
+    var issue_tree = [];
+    var socket = io();                                                        
+    var focused_canvas;
 
-PostingDivList.init();
-PostingTypeDiv.init();
+    PostingDivList.init();
+    PostingTypeDiv.init();
 
-var img = new Image();
-$("#background_canvas").width($(window).width());
-$("#background_canvas").height($(window).height());
-$("#background_canvas").zIndex(0);
-/*
-   img.onload = function(){
-   var context = background_canvas.getContext('2d');
-   context.fillStyle = context.createPattern(img, 'repeat');
-   context.fillRect(0, 0, background_canvas.width, background_canvas.height);
-   }
- */
+    var img = new Image();
+    $("#background_canvas").width($(window).width());
+    $("#background_canvas").height($(window).height());
+    $("#background_canvas").zIndex(0);
+    /*
+    img.onload = function(){
+    var context = background_canvas.getContext('2d');
+    context.fillStyle = context.createPattern(img, 'repeat');
+    context.fillRect(0, 0, background_canvas.width, background_canvas.height);
+    }
+    */
 
-$("#background_canvas").click(function(e){
-    $.sidr("close", "sidr-right"); $.sidr("close", "sidr-left");
+    $("#background_canvas").click(function(e){
+      $.sidr("close", "sidr-right"); $.sidr("close", "sidr-left");
 
     if(window.noclick){window.noclick = false; return;}
-    switch(PostingDivList.state){
-    case "active":
-    PostingDivList.hide(500); break;
-    case "inactive":
-    switch(PostingTypeDiv.state){
-    case "active":
-    PostingTypeDiv.hide(500); break;
-    case "inactive":
-    PostingTypeDiv.show(500); break;
-    }
-    break;
-    }
-    });
-
-
-var ESC_KEY_CODE = 27;
-$(window).keydown(function(e){if(e.which == ESC_KEY_CODE){PostingDivList.hide(500); PostingTypeDiv.hide(500)}});
-
-$(document).bind("contextmenu", function(e){
-    if(window.noclick){window.noclick = false; return false;}
-    transit(issue_tree[issue_tree.length - 2]);
-    return false;
-    });
-
-function set_sidebar(){
-  $("#left_sidr_ul").empty();
-  issue_tree.forEach(function(issue){
-      var li = generateElement("li", {"id" : "li_" + issue._id, "parent" : left_sidr_ul, "background" : color_list[issue.type]});
-      var text;
-      if(issue.sentence.size > 12){
-      text = issue.sentence.slice(0, 11) + "...";
-      }else{
-      text = issue.sentence;
+      switch(PostingDivList.state){
+        case "active":
+          PostingDivList.hide(500); break;
+        case "inactive":
+          switch(PostingTypeDiv.state){
+            case "active":
+              PostingTypeDiv.hide(500); break;
+            case "inactive":
+              PostingTypeDiv.show(500); break;
+          }
+          break;
       }
-      $(li).text(text);
+    });
+
+
+    var ESC_KEY_CODE = 27;
+  $(window).keydown(function(e){if(e.which == ESC_KEY_CODE){PostingDivList.hide(500); PostingTypeDiv.hide(500)}});
+
+    $(document).bind("contextmenu", function(e){
+    if(window.noclick){window.noclick = false; return false;}
+      transit(issue_tree[issue_tree.length - 2]);
+      return false;
+    });
+
+    function set_sidebar(){
+      $("#left_sidr_ul").empty();
+      issue_tree.forEach(function(issue){
+      var li = generateElement("li", {"id" : "li_" + issue._id, "parent" : left_sidr_ul, "background" : color_list[issue.type]});
+        var text;
+        if(issue.sentence.size > 12){
+          text = issue.sentence.slice(0, 11) + "...";
+        }else{
+          text = issue.sentence;
+        }
+        $(li).text(text);
       $(li).click(function(e){transit(issue); maskDiv.trigger("click")});
       });
-}
-function transit(new_issue){
-  $("#"+PostingDivList.id).hide(500);
-  if( ! new_issue){return;}
-  issue = new_issue;
-  issue_tree.push(issue);
-  while(issue_tree.indexOf(issue) + 1 < issue_tree.length){
-    issue_tree.pop();
-  }
-  FloatingDivList.hide();
-  PostingDivList.hide();
-  PostingTypeDiv.hide();
+    }
+    function transit(new_issue){
+      $("#"+PostingDivList.id).hide(500);
+    if( ! new_issue){return;}
+      issue = new_issue;
+      issue_tree.push(issue);
+      while(issue_tree.indexOf(issue) + 1 < issue_tree.length){
+        issue_tree.pop();
+      }
+      FloatingDivList.hide();
+      PostingDivList.hide();
+      PostingTypeDiv.hide();
 
-  set_sidebar();
+      set_sidebar();
 
-  //socket.emit("init_bord", issue);
-  refresh_bord();
-}
-socket.on("transit", function(new_issue){
-    transit(new_issue);
+      //socket.emit("init_bord", issue);
+      refresh_bord();
+    }
+    socket.on("transit", function(new_issue){
+      transit(new_issue);
     });
-socket.on("add_idea", function(idea){
-    add_idea(idea);
+    socket.on("add_idea", function(idea){
+      add_idea(idea);
     });
-socket.on("delete_floating_canvas", function(idea_id){
-    fc = FloatingDivList.find_by_id(idea_id);
+    socket.on("delete_floating_canvas", function(idea_id){
+      fc = FloatingDivList.find_by_id(idea_id);
     if(fc){FloatingDivList.remove(fc);}
     });
 
-socket.on("create_branch_div", function(idea_id, children){
-    var floating_div = FloatingDivList.find_by_id(idea_id);
-    var branch_div = new BranchDiv(floating_div, children);
-    floating_div.add_branch_div(branch_div);
-    $(branch_div.entity).hide(0);
+    socket.on("create_branch_div", function(idea_id, children){
+      var floating_div = FloatingDivList.find_by_id(idea_id);
+      var branch_div = new BranchDiv(floating_div, children);
+      floating_div.add_branch_div(branch_div);
+      $(branch_div.entity).hide(0);
     });
 
-socket.on("update_issue", function(updated_issue){issue = updated_issue; issue_tree.pop(); issue_tree.push(issue);});
+  socket.on("update_issue", function(updated_issue){issue = updated_issue; issue_tree.pop(); issue_tree.push(issue);});
 
-socket.on("p", function(msg){p(msg)});
+  socket.on("p", function(msg){p(msg)});
 
-function focus_on(canvas){
-  focused_canvas = canvas;
-  focused_canvas.focus_on();
-}
-function focus_out(){
-  if( ! focused_canvas){return;}
-  focused_canvas.focus_out();
-  focused_canvas = null;
-}
+    function focus_on(canvas){
+      focused_canvas = canvas;
+      focused_canvas.focus_on();
+    }
+    function focus_out(){
+    if( ! focused_canvas){return;}
+      focused_canvas.focus_out();
+      focused_canvas = null;
+    }
 
-function refresh_bord(){
-  var current_id_list = FloatingDivList.get_id_list();
-  socket.emit("update", current_id_list, issue);
-}
+    function refresh_bord(){
+      var current_id_list = FloatingDivList.get_id_list();
+      socket.emit("update", current_id_list, issue);
+    }
 
-setInterval("refresh_bord()", 10000);
-</script>
-  </body>
+    setInterval("refresh_bord()", 10000);
+  </script>
+</body>
 </html>
 

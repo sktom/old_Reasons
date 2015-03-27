@@ -221,6 +221,6 @@ canvas.background{
   background-attachment: fixed;
   opacity : 0.5;
 }
-textarea{resize : none; text-align: center;}
 *{margin : 0; padding : 0;}
+textarea{resize : none; text-align: center;}
 
