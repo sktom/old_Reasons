@@ -41,7 +41,7 @@ Leaf = function(idea, left, top, issue){
 
   var text_area = generateElement("textarea", {
     "id" : "floating_div_textarea_" + idea._id, "parent" : div,
-    "background-color" : color_list[idea.type], "font-size" : idea.rating / 4 + 30,
+    "background-color" : color_list[idea.type], "font-size" : idea.rating / 4 + 32,
     "margin" : "0.3em", "class" : "leaf"
   });
   this.text_area = text_area;
@@ -55,13 +55,14 @@ Leaf = function(idea, left, top, issue){
   var rating_slider = generateElement("div", {
     "position" : "relative", "width" : $("#"+text_area.id).width + 5, "top" : -20
   });
+  $(rating_slider).slider({"value" : 50});
   this.rating_slider = rating_slider;
   rating_slider.id = "slider_" + div.id;
   div.appendChild(rating_slider);
   rating_slider.addEventListener("click", function(e){
     e.stopPropagation();
   });
-  this.rating = function(){return $(rating_slider).slider("value")}
+  this.rating = function(){return $(rating_slider).slider("value") - 50}
 
   $("#" + rating_slider.id).slider({start : function(e){window.noclick = true;}});
 
