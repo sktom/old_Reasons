@@ -47,7 +47,6 @@ Array.prototype.last = function(){
 }
 
 
-
 function requestFullScreen(element) {
   // Supports most browsers and their versions.
   var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullscreen;
@@ -61,4 +60,9 @@ function requestFullScreen(element) {
     }
   }
 }
+
+//var color_list = {"assent" : "rgba(32, 178, 202, 1)", "dissent" : "rgba(247, 146, 86, 1)", "propose" : "rgba(110, 215, 176, 1)", "question" : "rgba(224, 217, 139, 1)", "theme" : "rgba(0, 0, 0, 0.5)", "root" : "rgba(0, 0, 0, 0)"};
+var color_list = {"assent" : "rgba(32, 178, 256, 1)", "dissent" : "rgba(256, 146, 86, 1)", "propose" : "rgba(110, 256, 176, 1)", "question" : "rgba(256, 256, 130, 1)", "theme" : "rgba(0, 0, 0, 0.5)", "root" : "rgba(0, 0, 0, 0)"};
+
+IdeaTypes = ["assent", "dissent", "propose", "question", "theme"];
 
