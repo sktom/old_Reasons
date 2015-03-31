@@ -1,8 +1,6 @@
 
 var PostingDivList = {};
 
-//var color_list = {"assent" : "rgba(32, 178, 202, 1)", "dissent" : "rgba(247, 146, 86, 1)", "propose" : "rgba(110, 215, 176, 1)", "question" : "rgba(224, 217, 139, 1)", "theme" : "rgba(0, 0, 0, 0.5)", "root" : "rgba(0, 0, 0, 0)"};
-var color_list = {"assent" : "rgba(32, 178, 256, 1)", "dissent" : "rgba(256, 146, 86, 1)", "propose" : "rgba(110, 256, 176, 1)", "question" : "rgba(256, 256, 130, 1)", "theme" : "rgba(0, 0, 0, 0.5)", "root" : "rgba(0, 0, 0, 0)"};
 PostingDivList.init = function(){
   var x = $(document).width() / 2;
   var y = $(document).height() / 2;
@@ -11,7 +9,7 @@ PostingDivList.init = function(){
   style['button'] = {"top" : y + 110, "left" : x - 130, "width" : 240, "height" : 30};
   style['textarea'] = {"top" : y - 140, "left" : x - 140, "width" : 260, "height" : 240, "font-size" : "40px"};
 
-  $.each(["assent", "dissent", "propose", "question"], function(i, type){
+  $.each(IdeaTypes, function(i, type){
     var posting_div = generateElement("div", {"id" : "posting_div_" + type});
     posting_div.elements = $.map(['canvas', 'button', 'textarea'], function(element_type){
       var element = generateElement(element_type, $.extend(style[element_type], {
@@ -60,7 +58,7 @@ PostingDivList.show = function(type, duration){
 }
 PostingDivList.hide = function(duration){
   if(duration == null){duration = 500;}
-  $.each(["assent", "dissent", "propose", "question"], function(i, type){
+  $.each(IdeaTypes, function(i, type){
     $("#" + PostingDivList[type]["textarea"].id).val("");
     $("#" + PostingDivList[type].id).hide(duration);
   })
@@ -85,12 +83,15 @@ PostingTypeDiv.init = function(){
   style["dissent"] = {"top" : y - size, "left" : x - 0};
   style["propose"] = {"top" : y - 0, "left" : x - size};
   style["question"] = {"top" : y - 0, "left" : x - 0};
-  $.each(["assent", "dissent", "propose", "question"], function(i, type){
-    var canvas = generateElement("canvas", $.extend(style[type], {
+  half = size / 2; quarter = half / 2;
+  style["theme"] = {"top" : y - quarter, "left" : x - quarter, "width" : half, "height" : half};
+  $.each(IdeaTypes, function(i, type){
+    var canvas = generateElement("canvas", $.extend({
       "position" : "absolute", "font-size" : "40px", "width" : size, "height" : size,
-        "id" : "posting_type_canvas_" + type, "parent" : PostingTypeDiv,
-        "background-color" : color_list[type]
-    }));
+      "id" : "posting_type_canvas_" + type, "parent" : PostingTypeDiv,
+      "background-color" : color_list[type]}
+      , style[type]
+    ));
     canvas["color"] = style[type]["background-color"];
     PostingTypeDiv[type] = canvas;
     canvas.addEventListener("click", function(e){
@@ -108,7 +109,7 @@ PostingTypeDiv.show = function(duration){
   if(duration == null){duration = 500;}
 
   //$(PostingTypeDiv).css("z-index", FloatingDivList.get_max_zindex() + 2);
-  $.each(["assent", "dissent", "propose", "question"], function(i, type){
+  $.each(IdeaTypes, function(i, type){
     $("#posting_type_canvas_" + type).css("z-index", FloatingDivList.get_max_zindex() + 2);
   });
 
