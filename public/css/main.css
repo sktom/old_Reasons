@@ -216,11 +216,6 @@ address,cite,i,em{
 canvas.background{
   z-index : -1;
   position : absolute;
-  /*
-  background-image:url("../asset/image/quadrille_p.png");
-  background-repeat: repeat;
-  background-attachment: fixed;
-  */
   background-color : rgba(213, 255, 245, 0.8);
   opacity : 0.5;
 }

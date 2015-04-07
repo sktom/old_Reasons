@@ -154,7 +154,7 @@
           text = issue.sentence;
         }
         $(li).text(text);
-      $(li).click(function(e){transit(issue); maskDiv.trigger("click")});
+        $(li).click(function(e){transit(issue)});
       });
     }
     function transit(new_issue){
