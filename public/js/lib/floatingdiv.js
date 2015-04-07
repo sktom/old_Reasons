@@ -1,15 +1,36 @@
 
 FloatingDiv = function(idea, x, y, issue){
-  if(FloatingDivList.include(idea.sentence)){return;};
+  if(FloatingDivList.include(idea)){return;};
   this.idea = idea;
   this.idea_id = idea._id;
 
   var leaf = new Leaf(idea, x, y, issue);
   this.leaf = leaf;
-  this.div = leaf.div;
+  this.locate(5);
+  var div = leaf.div;
+  this.div = div;
+  $(div).css({"position" : "absolute"});
+  $(div).draggable({
+    cancel : "text",
+    containment : "#background_canvas",
+    start : function(eo, ui){
+      $(div).zIndex(FloatingDivList.get_max_zindex() + 1);
+      window.noclick = true;
+    },
+    stop : function(eo){ }
+  });
 
   this.width = function(){return leaf.width()}
   this.height = function(){return leaf.height()}
+
+  /*
+  this.reposition = function(){
+    var offset = {"x" : 0, "y" : 0};
+    $.each(FloatingDivList, function(fd){
+    }):
+  }
+  */
+
 
   socket.emit("generate_branch_div", idea._id);
 
@@ -28,6 +49,28 @@ FloatingDiv = function(idea, x, y, issue){
     socket.emit("score", {
       "idea_id" : idea._id, "rating" : value
     });
+  });
+}
+
+FloatingDiv.prototype.position = function(){
+  return $(this.div).position();
+}
+FloatingDiv.prototype.locate = function(n){
+  if( ! n > 0){return}
+  var leaf = this.leaf;
+  var width = leaf.width(); var height = leaf.height();
+  var position = leaf.position();
+  var x = position.left; var y = position.top;
+  var this_ = this;
+  FloatingDivList.each(function(fd){
+    var fd_pos = fd.position();
+    var fd_x = fd_pos.left; var fd_y = fd_pos.top;
+    var fd_width = fd.width(); var fd_height = fd.height();
+    if(((x < fd_x && fd_x < x + width) || (fd_x < x && x < fd_x + fd_width)) &&
+      ((y < fd_y && fd_y < y + height) || (fd_y < y && y < fd_y + fd_height))){
+      leaf.relocate();
+      this_.locate(n-1);
+    }
   });
 }
 
@@ -61,6 +104,9 @@ FloatingDivList.hide = function(){
     var element = this.entity.pop().leaf.div;
     document.body.removeChild(element);
   }
+}
+FloatingDivList.each = function(callback){
+  this.entity.forEach(callback);
 }
 FloatingDivList.find_by_id = function(idea_id){
   var arr = FloatingDivList.entity;
