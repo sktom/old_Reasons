@@ -35,7 +35,7 @@ PostingDivList.init = function(){
 
 submit_idea = function(type){
   var sentence = PostingDivList[type]["textarea"].value;
-  if(sentence.length > 20){p("The sentence is too long(should be < 20)"); return}
+  if(sentence.length > 40){p("The sentence is too long(should be < 40)"); return}
   socket.emit("submit_idea", {"sentence" : sentence, "issue" : issue._id, "type" : type});
   PostingDivList.hide(500);
 }
