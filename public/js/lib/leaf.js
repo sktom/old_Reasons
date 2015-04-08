@@ -34,11 +34,12 @@ Leaf = function(idea, left, top, issue, small){
 
   var text_area = generateElement("textarea", {
     "id" : "floating_div_textarea_" + idea._id, "parent" : div,
-      "position" : "absolute",
-      "top" : "-10px", "left" : "-10px",
+    "position" : "absolute", "top" : "-10px", "left" : "-10px",
     "background-color" : color_list[idea.type], "font-size" : (idea.rating - small) / 4 + 32,
     "margin" : "0.3em", "class" : "leaf"
   });
+  if(idea.type == "theme"){$(text_area).css({ "color" : "#000000",
+    "text-shadow" : "1px 1px 0.5px #ffffff, -1px 1px 0.5px #ffffff, 1px -1px 0.5px #ffffff, -1px -1px 0.5px #ffffff"})};
   this.text_area = text_area;
   text_area.value = idea.sentence;
   autosize(text_area);
