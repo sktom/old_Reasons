@@ -32,7 +32,7 @@
 
 <div id="sidr-right" class = "menu">
   <ul id = "right_top_sidr_ul" top = 0>
-    <li>Login</li>
+    <li class="fb-login-button">Login</li>
   </ul>
   <ul id = "right_bottom_sidr_ul">
     <li>CONTACT US</li>
@@ -44,9 +44,26 @@
 <div id="right_div" class="menu-button menu-right"></div>
 -->
 
+<div id="fb-root"></div>
 <script type = "text/javascript">
   //function on_click(){requestFullScreen(document.body);}
   //$(document.body).trigger("click");
+
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '368205886699739',
+        xfbml      : true,
+        version    : 'v2.3'
+      });
+    };
+    (function(d, s, id){
+      var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {return;}
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.3&appId=368205886699739";
+      //js.src = "//connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
 
   $(document).ready(function() {
     $('#left_div').sidr({

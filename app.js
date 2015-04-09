@@ -64,16 +64,60 @@ Idea.with_children_id = function(parent_id, cb){
   },{limit:1});
 }
 
+var passport = require('passport')
+  , FacebookStrategy = require('passport-facebook').Strategy;
+//app.use(express.cookieParser());
+//app.use(express.bodyParser());
+//app.use(express.methodOverride());
+//app.use(express.session({secret: 'hogehogefugafuga'}));
+app.use(passport.initialize());
+app.use(passport.session()); 
 
 app.get('/', function(req, res){
   //res.sendfile('index.html');
   res.render('index');
 });
+passport.use(new FacebookStrategy({
+  clientID : "368205886699739",
+  clientSecret : "d7390de343e39eab0e0f0252f99bc1c6",
+  callbackURL : "http://reasons.herokuapp.com/auth/facebook/callback",
+  enableProof : false,
+  trustForwarded : true
+},
+function(accessToken, refreshToken, profile, done) {
+  User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+    return done(err, user);
+  });
+}
+));
 
+//app.get('/auth/facebook',
+//  passport.authenticate('facebook'));
+app.get('/auth/facebook', function(req, res){res.render("login")});
+
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', {failureRedirect: '/login' }),
+  function(req, res){
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
+/*
+   app.post('/login',
+   passport.authenticate('facebook'),
+   function(req, res) {
+   p("SNTHSTH");
+// If this function gets called, authentication was successful.
+// `req.user` contains the authenticated user.
+
+//res.redirect('/users/' + req.user.username);
+res.render('login');
+});
+
+*/
 function register_idea(msg){
   var idea = new Idea({
     "sentence" : msg.sentence, "type" : msg.type,
-    "issue" : msg.issue, "children" : [], "rating" : 0});
+  "issue" : msg.issue, "children" : [], "rating" : 0});
   idea.save();
   return idea;
 }
@@ -87,20 +131,20 @@ io.on('connection', function(socket){
       p("adding issue");
       root = register_idea({
         "sentence" : "Top", "type" : "root",
-        "children" : [], "issue" : null, "rating" : 0});
+           "children" : [], "issue" : null, "rating" : 0});
     }
     //socket.emit("transit", root.id);
     socket.emit("transit", root);
   });
 
   /*
-  socket.on("init_bord", function(issue){
-    console.log("issue = " + issue);
-    Idea.with_each_child(issue, function(child_idea){
-      socket.emit("add_idea", child_idea);
-    });
-  });
-  */
+     socket.on("init_bord", function(issue){
+     console.log("issue = " + issue);
+     Idea.with_each_child(issue, function(child_idea){
+     socket.emit("add_idea", child_idea);
+     });
+     });
+     */
 
   socket.on("generate_branch_div", function(idea_id){
     var children = [];
@@ -112,7 +156,7 @@ io.on('connection', function(socket){
 
   socket.on("update", function(existing_id_list, issue){
     Idea.with_children_id(issue._id, function(brother_id_list){
-    //brother_id_list = issue.children;
+      //brother_id_list = issue.children;
       brother_id_list.filter(function(e){true});
       id_list_to_add = brother_id_list.filter(function(e){return(existing_id_list.indexOf(e) < 0);});
       id_list_to_delete = existing_id_list.filter(function(e){return(brother_id_list.indexOf(e) < 0);});
@@ -124,7 +168,7 @@ io.on('connection', function(socket){
       id_list_to_delete.forEach(function(idea_id){
         socket.emit("delete_floating_canvas", idea_id);
       });
-      });
+    });
   });
 
   function update_issue(issue_id){

@@ -14,8 +14,8 @@ PostingDivList.init = function(){
     posting_div.elements = $.map(['canvas', 'button', 'textarea'], function(element_type){
       var element = generateElement(element_type, $.extend(style[element_type], {
         "background-color" : color_list[type], "position" :  "absolute",
-          "id" : "posting_div_" + type + "_" + element_type, "parent" : posting_div,
-          "z-index" : 500
+        "id" : "posting_div_" + type + "_" + element_type, "parent" : posting_div,
+        "z-index" : 500
       }));
       posting_div[element_type] = element;
       return element;
