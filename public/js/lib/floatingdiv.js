@@ -75,8 +75,8 @@ FloatingDiv.prototype.locate = function(n){
 }
 
 
-function add_idea(idea){
-  FloatingDivList.push(new FloatingDiv(idea));
+function add_idea(idea, x, y){
+  FloatingDivList.push(new FloatingDiv(idea, x, y));
 }
 function delete_idea(idea, floating_div){
   delete_floating_div(floating_div);

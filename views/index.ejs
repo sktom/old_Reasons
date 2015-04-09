@@ -132,8 +132,10 @@
     }
     */
 
+    var default_left = null; var default_top = null;
     $("#background_canvas").click(function(e){
       $.sidr("close", "sidr-right"); $.sidr("close", "sidr-left");
+      default_left = e.clientX - 50; default_top = e.clientY - 20;
 
     if(window.noclick){window.noclick = false; return;}
       switch(PostingDivList.state){
@@ -193,6 +195,9 @@
     }
     socket.on("transit", function(new_issue){
       transit(new_issue);
+    });
+    socket.on("add_new_idea", function(idea){
+      add_idea(idea, default_left, default_top);
     });
     socket.on("add_idea", function(idea){
       add_idea(idea);

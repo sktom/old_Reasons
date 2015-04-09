@@ -162,7 +162,7 @@ io.on('connection', function(socket){
       id_list_to_delete = existing_id_list.filter(function(e){return(brother_id_list.indexOf(e) < 0);});
       id_list_to_add.forEach(function(idea_id){
         Idea.with_specified_idea(idea_id, function(idea){
-          socket.emit("add_idea", idea);
+          socket.emit("add_new_idea", idea);
         });
       });
       id_list_to_delete.forEach(function(idea_id){
