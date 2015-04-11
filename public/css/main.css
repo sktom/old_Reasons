@@ -219,6 +219,14 @@ canvas.background{
   background-color : rgba(213, 255, 245, 0.8);
   opacity : 0.5;
 }
+
+/*
+.label{
+  width : auto;
+  height : auto;
+}
+*/
+
 div.menu{
   text-align : center;
 }

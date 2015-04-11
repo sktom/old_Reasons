@@ -134,7 +134,12 @@
 
     var default_left = null; var default_top = null;
     $("#background_canvas").click(function(e){
-      $.sidr("close", "sidr-right"); $.sidr("close", "sidr-left");
+      if(/block/.test($("#sidr-left").attr("style"))){
+        $.sidr("close", "sidr-left"); return;
+      }
+      if(/block/.test($("#sidr-right").attr("style"))){
+        $.sidr("close", "sidr-right"); return;
+      }
       default_left = e.clientX - 50; default_top = e.clientY - 20;
 
     if(window.noclick){window.noclick = false; return;}
@@ -198,8 +203,10 @@
     });
     socket.on("add_new_idea", function(idea){
       add_idea(idea, default_left, default_top);
+      default_left = null; default_top = null;
     });
     socket.on("add_idea", function(idea){
+      default_left = null; default_top = null;
       add_idea(idea);
     });
     socket.on("delete_floating_canvas", function(idea_id){
