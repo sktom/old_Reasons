@@ -53,7 +53,7 @@ Leaf = function(idea, left, top, issue, small){
   var rating_slider = generateElement("div", {
     "position" : "relative", "width" : $("#"+text_area.id).width + 5, "top" : $(text_area).height()
   });
-  $(rating_slider).slider({"value" : 50});
+  $(rating_slider).slider({"value" : idea.rating+50});
   this.rating_slider = rating_slider;
   rating_slider.id = "slider_" + div.id;
   div.appendChild(rating_slider);
