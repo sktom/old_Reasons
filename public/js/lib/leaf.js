@@ -34,9 +34,9 @@ Leaf = function(idea, left, top, issue, small){
 
   var text_area = generateElement("textarea", {
     "id" : "floating_div_textarea_" + idea._id, "parent" : div,
-    "position" : "absolute", "top" : "-10px", "left" : "-10px",
+    "position" : "absolute", "top" : "0px", "left" : "0px",
     "background-color" : color_list[idea.type], "font-size" : (idea.rating - small) / 4 + 32,
-    "margin" : "0.3em", "class" : "leaf"
+    "margin" : "0.0em", "class" : "leaf"
   });
   if(idea.type == "theme"){$(text_area).css({ "color" : "#000000",
     "text-shadow" : "1px 1px 0.5px #ffffff, -1px 1px 0.5px #ffffff, 1px -1px 0.5px #ffffff, -1px -1px 0.5px #ffffff"})};
@@ -45,14 +45,16 @@ Leaf = function(idea, left, top, issue, small){
   autosize(text_area);
   text_area.disabled = true;
   if(idea.sentence.length + 5 < 20){text_area.cols = idea.sentence.length + 5;}
+  $(text_area).height(text_area.scrollHeight - Math.round(text_area.scrollHeight % (parseFloat($(text_area).css('font-size'))*1.5)));
 
   this.width = function(){return $(text_area).width()};
   this.height = function(){return $(text_area).height()};
   this.position = function(){return $(div).position()};
 
   var rating_slider = generateElement("div", {
-    "position" : "relative", "width" : $("#"+text_area.id).width + 5, "top" : $(text_area).height()
+    "position" : "relative", "width" : $(text_area).width(), "top" : $(text_area).height()
   });
+  $(rating_slider).height(7);
   $(rating_slider).slider({"value" : idea.rating+50});
   this.rating_slider = rating_slider;
   rating_slider.id = "slider_" + div.id;
