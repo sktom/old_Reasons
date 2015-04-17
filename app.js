@@ -6,6 +6,7 @@ function p(arg){
 
 var express = require('express');
 var app = express();
+app.set("trust proxy", true);
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 var http = require('http').Server(app);
@@ -101,6 +102,7 @@ app.get('/auth/facebook/callback',
   function(req, res){
     // Successful authentication, redirect home.
     res.redirect('/');
+    p(req);
   });
 /*
    app.post('/login',
