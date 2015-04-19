@@ -44,7 +44,7 @@ Leaf = function(idea, left, top, issue, small){
   text_area.value = idea.sentence;
   autosize(text_area);
   text_area.disabled = true;
-  if(idea.sentence.length + 5 < 20){text_area.cols = idea.sentence.length + 5;}
+  if(idea.sentence.length + 5 < 15){text_area.cols = idea.sentence.length + 5;}
   $(text_area).height(text_area.scrollHeight - Math.round(text_area.scrollHeight % (parseFloat($(text_area).css('font-size'))*1.5)));
 
   this.width = function(){return $(text_area).width()};
