@@ -19,10 +19,20 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
 });
 var Schema = mongoose.Schema;
+
+var User = mongoose.model("User", Schema({
+  "id" : Buffer, "gender" : String, "birthday" : Date,
+  "log" : Array, "rating" : Number
+}));
+
 var Idea = mongoose.model("Idea", Schema({
   "sentence" : String, "type" : String,
   "issue" : Schema.Types.ObjectId, "children" : Array, "rating" : Number
 }));
+
+//mongoose.smart_model = function(table_name, schema){
+  //var model = mongoose.model(table_name, schema);
+
 Idea.ifExist = function(idea_id, cb_if_exist, cb_if_not){
   Idea.find({"_id" : idea_id}, function(err, idea_list){
     idea = idea_list[0];
@@ -65,59 +75,19 @@ Idea.with_children_id = function(parent_id, cb){
   },{limit:1});
 }
 
-var passport = require('passport')
-  , FacebookStrategy = require('passport-facebook').Strategy;
-//app.use(express.cookieParser());
-//app.use(express.bodyParser());
-//app.use(express.methodOverride());
-//app.use(express.session({secret: 'hogehogefugafuga'}));
-app.use(passport.initialize());
-app.use(passport.session()); 
-
-app.get('/publication', function(req, res){res.render("publication")});
 app.get('/', function(req, res){
   //res.sendfile('index.html');
   res.render('index');
 });
-passport.use(new FacebookStrategy({
-  clientID : "368205886699739",
-  clientSecret : "d7390de343e39eab0e0f0252f99bc1c6",
-  callbackURL : "http://reasons.herokuapp.com/auth/facebook/callback",
-  enableProof : false,
-  trustForwarded : true
-},
-function(accessToken, refreshToken, profile, done) {
-  User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-    return done(err, user);
-  });
+
+function register_user(profile){
+  var user = new User({
+    "id" : profile.id, "gender" : profile.gender,
+    "birthday" : profile.birthday, "log" : [], "rating" : 0});
+  user.save();
+  return user;
 }
-));
 
-//app.get('/auth/facebook',
-//  passport.authenticate('facebook'));
-//app.get('/auth/facebook', function(req, res){res.render("login")});
-
-/************
-app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', {failureRedirect: '/login' }),
-  function(req, res){
-    // Successful authentication, redirect home.
-    res.redirect('/');
-  });
-************ */
-/*
-   app.post('/login',
-   passport.authenticate('facebook'),
-   function(req, res) {
-   p("SNTHSTH");
-// If this function gets called, authentication was successful.
-// `req.user` contains the authenticated user.
-
-//res.redirect('/users/' + req.user.username);
-res.render('login');
-});
-
-*/
 function register_idea(msg){
   var idea = new Idea({
     "sentence" : msg.sentence, "type" : msg.type,
@@ -219,10 +189,17 @@ io.on('connection', function(socket){
     Idea.update({"_id" : score.idea_id}, {"rating" : score.rating}).exec();
   });
 
+  socket.on("puid", function(){
+    pm(app.get("https://graph.facebook.com/me/"));
+  });
 
+  socket.on("FB_LOGIN", function(info){
+    console.log(info);
+  });
 });
 
-http.listen(process.env.PORT || 3000, function(){
-  console.log('listening on *:3000');
+var port = process.env.PORT || 3000;
+http.listen(port, function(){
+  console.log('listening on *:' + port);
 });
 

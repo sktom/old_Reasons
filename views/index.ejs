@@ -18,6 +18,7 @@
 <script src = "js/lib/floatingdiv.js"></script>
 <script src = "js/lib/postingdiv.js"></script>
 <script src = "js/lib/ecc.min.js"></script>
+<script src="https://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha3.js"></script>
 <script src = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
 <script src = "js/lib/jquery.sidr.min.js"></script>
 <script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
@@ -32,7 +33,7 @@
 
 <div id="sidr-right" class = "menu">
   <ul id = "right_top_sidr_ul" top = 0>
-    <li class="fb-login-button">Login</li>
+    <li id = "li_FB_Login">Login</li>
   </ul>
   <ul id = "right_bottom_sidr_ul">
     <li>CONTACT US</li>
@@ -76,6 +77,27 @@
     $('#right_div').sidr({
       name: 'sidr-right',
       side: 'right'
+    });
+
+    $("#li_FB_Login").click(function(){
+      FB.login(function(response) {
+        if (response.authResponse) {
+          var id; var name;
+          FB.api('/me', function(response) {
+          window.res = response;
+            id = CryptoJS.SHA3(response.id, {outputLength : 256});
+            name = response.first_name;
+            $("#li_FB_Login").text(name + "'s Page");
+            socket.emit("FB_LOGIN", id);
+            $("#li_FB_Login").unbind("click");
+            $("#li_FB_Login").click(function(){
+              window.location = window.location + name + "/";
+            });
+          });
+        } else {
+          p('User cancelled login or did not fully authorize.');
+        }
+      });
     });
   });
 
