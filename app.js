@@ -20,35 +20,52 @@ db.once('open', function (callback) {
 });
 var Schema = mongoose.Schema;
 
-var User = mongoose.model("User", Schema({
-  "id" : Buffer, "gender" : String, "birthday" : Date,
+mongoose.smart_model = function(table_name, schema){
+  var model = mongoose.model(table_name, schema);
+
+  model.ifExist = function(idea_id, cb_if_exist, cb_if_not){
+    model.find({"_id" : idea_id}, function(err, idea_list){
+      idea = idea_list[0];
+      if(idea){
+        cb_if_exist(idea_id, idea);
+      }else{
+        cb_if_not(idea_id);
+      }
+    },{limit:1});
+  }
+  model.with_specified_idea = function(id, cb){
+    model.find({"_id" : id}, function(err, list){
+      if(err){p("ERROR:Faild to specify an model by ID");}
+      if( ! (list.length == 1)){p("record should be specified");}
+      cb(list[0]);
+    },{limit:1});
+  }
+
+  return model;
+}
+
+var User = mongoose.smart_model("User", Schema({
+  "_id" : Buffer, "gender" : String, "birthday" : Date,
   "log" : Array, "rating" : Number
 }));
+function register_user(profile){
+  var user = new User({
+    "id" : profile.id, "gender" : profile.gender,
+      "birthday" : profile.birthday, "log" : [], "rating" : 0});
+  user.save();
+  return user;
+}
 
-var Idea = mongoose.model("Idea", Schema({
+var Idea = mongoose.smart_model("Idea", Schema({
   "sentence" : String, "type" : String,
   "issue" : Schema.Types.ObjectId, "children" : Array, "rating" : Number
 }));
-
-//mongoose.smart_model = function(table_name, schema){
-  //var model = mongoose.model(table_name, schema);
-
-Idea.ifExist = function(idea_id, cb_if_exist, cb_if_not){
-  Idea.find({"_id" : idea_id}, function(err, idea_list){
-    idea = idea_list[0];
-    if(idea){
-      cb_if_exist(idea_id, idea);
-    }else{
-      cb_if_not(idea_id);
-    }
-  },{limit:1});
-}
-Idea.with_specified_idea = function(idea_id, cb){
-  Idea.find({"_id" : idea_id}, function(err, idea_list){
-    if(err){p("ERROR:Faild to specify an Idea by ID");}
-    if( ! (idea_list.length == 1)){p("idea should be specified");}
-    cb(idea_list[0]);
-  },{limit:1});
+function register_idea(msg){
+  var idea = new Idea({
+    "sentence" : msg.sentence, "type" : msg.type,
+      "issue" : msg.issue, "children" : [], "rating" : 0});
+  idea.save();
+  return idea;
 }
 Idea.with_parent_idea = function(parent_id, cb){
   Idea.find({"_id" : parent_id}, function(err, issue_idea_list){
@@ -80,22 +97,6 @@ app.get('/', function(req, res){
   res.render('index');
 });
 
-function register_user(profile){
-  var user = new User({
-    "id" : profile.id, "gender" : profile.gender,
-    "birthday" : profile.birthday, "log" : [], "rating" : 0});
-  user.save();
-  return user;
-}
-
-function register_idea(msg){
-  var idea = new Idea({
-    "sentence" : msg.sentence, "type" : msg.type,
-  "issue" : msg.issue, "children" : [], "rating" : 0});
-  idea.save();
-  return idea;
-}
-
 io.on('connection', function(socket){
   function pm(msg){socket.emit("p", msg)}
 
@@ -110,15 +111,6 @@ io.on('connection', function(socket){
     //socket.emit("transit", root.id);
     socket.emit("transit", root);
   });
-
-  /*
-     socket.on("init_bord", function(issue){
-     console.log("issue = " + issue);
-     Idea.with_each_child(issue, function(child_idea){
-     socket.emit("add_idea", child_idea);
-     });
-     });
-     */
 
   socket.on("generate_branch_div", function(idea_id){
     var children = [];
@@ -194,7 +186,7 @@ io.on('connection', function(socket){
   });
 
   socket.on("FB_LOGIN", function(info){
-    console.log(info);
+    console.log("BBBBBFFFF");
   });
 });
 
