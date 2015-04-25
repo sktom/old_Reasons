@@ -16,24 +16,24 @@ var mongoose = require('mongoose');
 mongoose.connect(process.env.MONGOLAB_URI || 'localhost:27017');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function (callback) {
-});
+db.once('open', function(callback){});
 var Schema = mongoose.Schema;
 
 mongoose.smart_model = function(table_name, schema){
   var model = mongoose.model(table_name, schema);
 
-  model.ifExist = function(idea_id, cb_if_exist, cb_if_not){
-    model.find({"_id" : idea_id}, function(err, idea_list){
-      idea = idea_list[0];
-      if(idea){
-        cb_if_exist(idea_id, idea);
+  model.ifExist = function(id, cb_if_exist, cb_if_not){
+    model.find({"_id" : id}, function(err, list){
+      if( ! list){cb_if_not(id); return}
+      element = list[0];
+      if(element){
+        cb_if_exist(id, element);
       }else{
-        cb_if_not(idea_id);
+        cb_if_not(id);
       }
     },{limit:1});
   }
-  model.with_specified_idea = function(id, cb){
+  model.with_specified_element = function(id, cb){
     model.find({"_id" : id}, function(err, list){
       if(err){p("ERROR:Faild to specify an model by ID");}
       if( ! (list.length == 1)){p("record should be specified");}
@@ -45,14 +45,21 @@ mongoose.smart_model = function(table_name, schema){
 }
 
 var User = mongoose.smart_model("User", Schema({
-  "_id" : Buffer, "gender" : String, "birthday" : Date,
+  "_id" : String, "gender" : String,// "birthday" : Date,
   "log" : Array, "rating" : Number
 }));
 function register_user(profile){
+  console.log("start");
+  console.log(profile.id);
   var user = new User({
-    "id" : profile.id, "gender" : profile.gender,
-      "birthday" : profile.birthday, "log" : [], "rating" : 0});
-  user.save();
+    "_id" : profile.id, "gender" : profile.gender,
+    //"birthday" : profile.birthday,
+    "log" : [], "rating" : 0
+  });
+  user.save(function(err, thor) {
+    if (err) console.error(err);
+  });
+  console.log("end");
   return user;
 }
 
@@ -127,7 +134,7 @@ io.on('connection', function(socket){
       id_list_to_add = brother_id_list.filter(function(e){return(existing_id_list.indexOf(e) < 0);});
       id_list_to_delete = existing_id_list.filter(function(e){return(brother_id_list.indexOf(e) < 0);});
       id_list_to_add.forEach(function(idea_id){
-        Idea.with_specified_idea(idea_id, function(idea){
+        Idea.with_specified_element(idea_id, function(idea){
           socket.emit("add_new_idea", idea);
         });
       });
@@ -138,7 +145,7 @@ io.on('connection', function(socket){
   });
 
   function update_issue(issue_id){
-    Idea.with_specified_idea(issue_id, function(issue){
+    Idea.with_specified_element(issue_id, function(issue){
       socket.emit('update_issue', issue);
     });
   }
@@ -185,8 +192,10 @@ io.on('connection', function(socket){
     pm(app.get("https://graph.facebook.com/me/"));
   });
 
-  socket.on("FB_LOGIN", function(info){
-    console.log("BBBBBFFFF");
+  socket.on("FB_LOGIN", function(profile){
+    User.ifExist(profile.id,
+      function(){},
+      function(){register_user(profile)});
   });
 });
 

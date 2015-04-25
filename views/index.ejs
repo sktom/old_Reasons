@@ -72,7 +72,7 @@
   $(document).ready(function() {
     $('#left_div').sidr({
       name: 'sidr-left',
-      side: 'left' // By default
+      side: 'left'
     });
     $('#right_div').sidr({
       name: 'sidr-right',
@@ -85,13 +85,16 @@
           var id; var name;
           FB.api('/me', function(response) {
           window.res = response;
-            id = CryptoJS.SHA3(response.id, {outputLength : 256});
-            name = response.first_name;
-            $("#li_FB_Login").text(name + "'s Page");
-            socket.emit("FB_LOGIN", id);
+          var profile = {
+            "id" : CryptoJS.SHA3(response.id, {outputLength : 256}).toString(),
+            "name" : response.first_name,// "birthday" : response.birthday,
+            "gender" : response.gender
+          }
+            $("#li_FB_Login").text(profile.name + "'s Page");
+            socket.emit("FB_LOGIN", profile);
             $("#li_FB_Login").unbind("click");
             $("#li_FB_Login").click(function(){
-              window.location = window.location + name + "/";
+              window.location = window.location + profile.name + "/";
             });
           });
         } else {
